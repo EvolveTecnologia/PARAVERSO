@@ -15,15 +15,15 @@ export const Logo: React.FC<LogoProps> = ({
   size = 'md',
   showPlatformTitle = true,
 }) => {
-  const logoSrc = inverted ? '/logo_white.png' : '/logo.png';
-  const logoSvgSrc = inverted ? '/logo_white.svg' : '/logo.svg';
+  const logoSrc = inverted ? '/logoparaversowhite.png' : '/logoparaverso.png';
+  const logoFallback = inverted ? '/logo_white.svg' : '/logo.svg';
 
   if (variant === 'icon-only') {
     return (
       <div className={`inline-flex items-center justify-center select-none ${className}`}>
         <img 
           src="/pwa-512x512.png" 
-          alt="Paráverso Ícone Oficial" 
+          alt="PARAVERSO" 
           className="w-full h-full object-contain filter drop-shadow-md rounded-lg"
           loading="eager"
           onError={(e) => {
@@ -39,11 +39,11 @@ export const Logo: React.FC<LogoProps> = ({
       <div className={`inline-flex items-center select-none ${className}`}>
         <img 
           src={logoSrc} 
-          alt="Secretaria de Cultura - Governo do Pará" 
+          alt="PARAVERSO • SECULT-PA" 
           className="h-9 sm:h-11 w-auto max-w-full object-contain filter drop-shadow-sm transition-all"
           loading="eager"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = logoSvgSrc;
+            (e.target as HTMLImageElement).src = logoFallback;
           }}
         />
       </div>
@@ -55,11 +55,11 @@ export const Logo: React.FC<LogoProps> = ({
       <div className={`inline-flex flex-col items-center justify-center select-none ${className}`}>
         <img 
           src={logoSrc} 
-          alt="Secretaria de Cultura - Governo do Pará" 
+          alt="PARAVERSO • SECULT-PA" 
           className="h-10 sm:h-12 w-auto object-contain filter drop-shadow-md"
           loading="eager"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = logoSvgSrc;
+            (e.target as HTMLImageElement).src = logoFallback;
           }}
         />
       </div>
@@ -69,14 +69,14 @@ export const Logo: React.FC<LogoProps> = ({
   // Horizontal variant (default)
   return (
     <div className={`inline-flex items-center select-none ${className}`}>
-      {/* Official Government of Pará / SECULT Logo */}
+      {/* Official PARAVERSO Logo */}
       <img 
         src={logoSrc} 
-        alt="Secretaria de Cultura • Governo do Pará" 
+        alt="PARAVERSO • SECULT-PA" 
         className="h-8 sm:h-10 md:h-11 w-auto max-w-[280px] sm:max-w-[340px] object-contain filter drop-shadow-md shrink-0 transition-all"
         loading="eager"
         onError={(e) => {
-          (e.target as HTMLImageElement).src = logoSvgSrc;
+          (e.target as HTMLImageElement).src = logoFallback;
         }}
       />
     </div>
