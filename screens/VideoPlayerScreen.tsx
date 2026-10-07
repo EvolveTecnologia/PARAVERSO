@@ -3,7 +3,7 @@ import {
   ChevronLeft, Play, Pause, 
   Settings, Check, X, Minimize, Maximize, Languages, Gauge, Globe,
   Glasses, Compass, RotateCcw,
-  Sparkles, Eye
+  Sparkles, Eye, Volume2, VolumeX
 } from 'lucide-react';
 import { Lesson } from '../types';
 
@@ -38,6 +38,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
   onProgressUpdate 
 }) => {
   const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -174,14 +175,16 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
           videoId: videoId,
           playerVars: {
             autoplay: 1,
-            // For 360 videos, controls: 1 allows the user to see YouTube's native 360 compass and quality selectors
-            controls: is360Content ? 1 : 0,
+            // Disable YouTube native controls completely - platform player controls exclusively
+            controls: 0,
             rel: 0,
             modestbranding: 1,
             playsinline: 1,
             enablejsapi: 1,
             origin: window.location.origin,
-            fs: 1,
+            fs: 0,
+            disablekb: 1,
+            iv_load_policy: 3,
             start: Math.floor(currentTime)
           },
           events: {
@@ -453,6 +456,65 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
     }
   };
 
+  const toggleMute = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    if (!isVrMode) {
+      if (nextMuted) {
+        singlePlayerRef.current?.mute();
+      } else {
+        singlePlayerRef.current?.unMute();
+      }
+    } else {
+      if (nextMuted) {
+        leftPlayerRef.current?.mute();
+      } else {
+        leftPlayerRef.current?.unMute();
+      }
+    }
+    triggerControls();
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.code === 'KeyF') {
+        e.preventDefault();
+        if (containerRef.current) {
+          if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+          else containerRef.current.requestFullscreen().catch(() => {});
+        }
+      } else if (e.code === 'KeyM') {
+        e.preventDefault();
+        toggleMute();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        const nextTime = Math.min(duration, currentTime + 5);
+        setCurrentTime(nextTime);
+        if (!isVrMode) singlePlayerRef.current?.seekTo(nextTime, true);
+        else {
+          leftPlayerRef.current?.seekTo(nextTime, true);
+          rightPlayerRef.current?.seekTo(nextTime, true);
+        }
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        const prevTime = Math.max(0, currentTime - 5);
+        setCurrentTime(prevTime);
+        if (!isVrMode) singlePlayerRef.current?.seekTo(prevTime, true);
+        else {
+          leftPlayerRef.current?.seekTo(prevTime, true);
+          rightPlayerRef.current?.seekTo(prevTime, true);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPlaying, isMuted, currentTime, duration, isVrMode, isReady]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -634,15 +696,18 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
           </div>
         </div>
 
-        {/* Central Play/Pause button (Visible when paused or controls toggled) */}
+        {/* Central Play/Pause button */}
         <div className="flex items-center justify-center pointer-events-auto">
           <button 
             onClick={togglePlay} 
-            className={`w-16 h-16 bg-[#0072BC]/85 hover:bg-[#0072BC] backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white transition-all duration-300 cursor-pointer shadow-xl ${
-              isPlaying ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100'
+            className={`w-16 h-16 sm:w-20 sm:h-20 bg-[#0072BC]/90 hover:bg-[#0072BC] backdrop-blur-md border border-white/25 rounded-full flex items-center justify-center text-white transition-all duration-300 cursor-pointer shadow-2xl hover:scale-105 active:scale-95 ${
+              isPlaying 
+                ? (showControls ? 'opacity-85 hover:opacity-100 scale-95' : 'opacity-0 scale-75 pointer-events-none') 
+                : 'opacity-100 scale-100'
             }`}
+            title={isPlaying ? "Pausar vídeo" : "Iniciar reprodução"}
           >
-            {isPlaying ? <Pause size={28} fill="white" /> : <Play size={28} fill="white" className="ml-1" />}
+            {isPlaying ? <Pause size={30} fill="white" /> : <Play size={30} fill="white" className="ml-1" />}
           </button>
         </div>
 
@@ -658,26 +723,47 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
               value={currentTime} 
               onClick={(e) => e.stopPropagation()}
               onChange={handleSeek} 
-              className="w-full h-1.5 bg-white/20 rounded-full appearance-none cursor-pointer accent-[#DE292E]" 
+              className="w-full h-1.5 bg-white/20 hover:bg-white/30 rounded-full appearance-none cursor-pointer accent-[#DE292E] transition-all" 
             />
           </div>
 
           <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-2.5 text-[10px] sm:text-xs font-bold text-white bg-black/60 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
-              <span className="text-[#00A3E0]">{formatTime(currentTime)}</span>
-              <span className="opacity-30">/</span>
-              <span className="opacity-70">{formatTime(duration)}</span>
-              {playbackSpeed !== 1 && <span className="text-[#DE292E] ml-1">{playbackSpeed}x</span>}
-              {isVrMode && (
-                <span className="ml-1 px-1.5 py-0.5 bg-[#DE292E] text-white text-[9px] font-black rounded uppercase">
-                  VR SPLIT
-                </span>
-              )}
-              {is360Content && !isVrMode && (
-                <span className="ml-1 px-1.5 py-0.5 bg-[#0072BC] text-white text-[9px] font-black rounded uppercase">
-                  360° LIVE
-                </span>
-              )}
+            <div className="flex items-center gap-2.5 sm:gap-3 pointer-events-auto">
+              {/* Play / Pause button in Bottom Bar */}
+              <button 
+                onClick={togglePlay} 
+                className="p-2 sm:p-2.5 bg-[#0072BC] hover:bg-[#005CAB] text-white rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center hover:scale-105 active:scale-95"
+                title={isPlaying ? "Pausar vídeo" : "Reproduzir vídeo"}
+              >
+                {isPlaying ? <Pause size={18} fill="white" /> : <Play size={18} fill="white" className="ml-0.5" />}
+              </button>
+
+              {/* Mute / Unmute Button */}
+              <button 
+                onClick={toggleMute} 
+                className="p-2 sm:p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl border border-white/10 transition-colors cursor-pointer flex items-center justify-center"
+                title={isMuted ? "Ativar som" : "Desativar som"}
+              >
+                {isMuted ? <VolumeX size={18} className="text-[#DE292E]" /> : <Volume2 size={18} />}
+              </button>
+
+              {/* Timestamp & Mode Badges */}
+              <div className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-white bg-black/60 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
+                <span className="text-[#00A3E0]">{formatTime(currentTime)}</span>
+                <span className="opacity-30">/</span>
+                <span className="opacity-70">{formatTime(duration)}</span>
+                {playbackSpeed !== 1 && <span className="text-[#DE292E] ml-1">{playbackSpeed}x</span>}
+                {isVrMode && (
+                  <span className="ml-1 px-1.5 py-0.5 bg-[#DE292E] text-white text-[9px] font-black rounded uppercase">
+                    VR SPLIT
+                  </span>
+                )}
+                {is360Content && !isVrMode && (
+                  <span className="ml-1 px-1.5 py-0.5 bg-[#0072BC] text-white text-[9px] font-black rounded uppercase">
+                    360° LIVE
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-2 pointer-events-auto">
@@ -685,7 +771,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
               <button 
                 onClick={toggleVrMode} 
                 className={`p-2 rounded-xl border transition-colors cursor-pointer ${
-                  isVrMode ? 'bg-[#DE292E] border-white text-white' : 'bg-white/10 hover:bg-white/20 border-white/10 text-white'
+                  isVrMode ? 'bg-[#DE292E] border-white text-white shadow-md' : 'bg-white/10 hover:bg-white/20 border-white/10 text-white'
                 }`}
                 title={isVrMode ? "Desativar Modo VR" : "Ativar Modo VR Estereoscópico"}
               >
