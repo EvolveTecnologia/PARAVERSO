@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Primary Meta Tags -->
+    <title>PARAVERSO - Plataforma de Streaming &amp; Realidade Virtual | Governo do Pará</title>
+    <meta name="title" content="PARAVERSO - Plataforma de Streaming &amp; Realidade Virtual | Governo do Pará">
+    <meta name="description" content="A Plataforma PARAVERSO é o ecossistema oficial de streaming em Realidade Virtual 360º da Secretaria de Estado de Cultura (SECULT) e Governo do Estado do Pará. Imersão cultural, patrimônio amazônico e saberes ancestrais.">
+    <meta name="keywords" content="PARAVERSO, Governo do Pará, SECULT-PA, Realidade Virtual, streaming 360, Círio de Nazaré, Amazônia, cultura paraense, patrimônio imaterial, Belém">
+    <meta name="author" content="Secretaria de Estado de Cultura - Governo do Pará">
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="PARAVERSO">
+    <meta property="og:title" content="PARAVERSO - Streaming &amp; Realidade Virtual | SECULT Pará">
+    <meta property="og:description" content="Explore o patrimônio cultural, histórico e socioambiental da Amazônia Paraense em Realidade Virtual 360º. Uma iniciativa oficial do Governo do Estado do Pará.">
+    
+    <!-- Primary OG Landscape Image (1200x630 JPEG) -->
+    <meta property="og:image" content="/og-image.jpg">
+    <meta property="og:image:secure_url" content="/og-image.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="PARAVERSO - Governo do Estado do Pará / SECULT">
+
+    <!-- Secondary OG PNG Fallback -->
+    <meta property="og:image" content="/og-image.png">
+    <meta property="og:image:secure_url" content="/og-image.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Square OG Image (800x800) -->
+    <meta property="og:image" content="/og-square.jpg">
+    <meta property="og:image:secure_url" content="/og-square.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="800">
+    <meta property="og:image:height" content="800">
+    <meta property="og:image:alt" content="Logo Oficial Governo do Pará - PARAVERSO">
+
+    <link rel="image_src" href="/og-image.jpg">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@GovernoPara">
+    <meta name="twitter:title" content="PARAVERSO - Streaming &amp; Realidade Virtual | Governo do Pará">
+    <meta name="twitter:description" content="Preservação digital, 360º VR, eventos e o melhor da cultura amazônica contada pelos paraenses.">
+    <meta name="twitter:image" content="/og-image.jpg">
+    <meta name="twitter:image:alt" content="PARAVERSO - Governo do Pará">
+
+    <!-- Dynamic Origin OG Synchronizer for client execution -->
+    <script>
+      (function() {
+        try {
+          if (window.location.origin && !window.location.origin.includes('file://')) {
+            var origin = window.location.origin;
+            var ogUrl = document.querySelector('meta[property="og:url"]');
+            if (ogUrl) ogUrl.setAttribute('content', origin + window.location.pathname);
+          }
+        } catch(e) {}
+      })();
+    </script>
+
+    <!-- PWA & Mobile Optimization -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="alternate" type="application/json" href="/manifest.json">
+    <meta name="theme-color" content="#0A1626">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PARAVERSO">
+
+    <!-- Favicon & App Icons -->
+    <link rel="icon" type="image/svg+xml" href="/logo.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+    <!-- Schema.org JSON-LD Structured Data for Search Engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "PARAVERSO",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "All",
+      "description": "Plataforma de streaming em Realidade Virtual 360º para difusão e preservação da cultura, turismo e sociobiodiversidade do Estado do Pará.",
+      "url": "https://paraverso.pa.gov.br",
+      "image": "/og-image.png",
+      "author": {
+        "@type": "Organization",
+        "name": "Secretaria de Estado de Cultura - Governo do Pará",
+        "url": "https://www.secult.pa.gov.br"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "BRL"
+      }
+    }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                primary: '#0072BC',
+                'primary-dark': '#004884',
+                'primary-deep': '#005CAB',
+                'primary-light': '#00A3E0',
+                orange: '#DE292E',
+                'orange-hover': '#C8191E',
+                accent: '#DE292E',
+                red: '#DE292E',
+                dark: '#0A1626',
+                graphite: '#132238',
+                offwhite: '#F8FAFC',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background-color: #0A1626;
+            color: #FFFFFF;
+            margin: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: pan-x pan-y; 
+            overscroll-behavior-y: none;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        *::-webkit-scrollbar {
+            display: none;
+            width: 0px;
+            height: 0px;
+            background: transparent;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-[#0A1626] text-white">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>

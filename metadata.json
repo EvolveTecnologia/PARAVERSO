@@ -1,0 +1,11 @@
+{
+  "name": "PARAVERSO",
+  "description": "A Plataforma de Streaming PARAVERSO é uma solução tecnológica proprietária de imersão digital em Realidade Virtual 360º, estruturada para modernizar a política cultural e a comunicação pública do Estado do Pará. Apoiada em uma infraestrutura de ponta com adaptive streaming, armazenamento em nuvem, CDN e rigorosa segurança cibernética, a plataforma funciona como um ecossistema interativo para hospedar e transmitir eventos ao vivo (shows, esportes, festas religiosas como o Círio de Nazaré), sobrevoos e documentários ambientais. Integrada ao Portal da SECULT-PA e ao Mapa Cultural do Pará, o PARAVERSO tem o propósito de preservar digitalmente os saberes ancestrais e a riqueza socioambiental amazônica, democratizar o acesso à cultura, fomentar o turismo de baixo carbono e promover a educação patrimonial em larga escala, garantindo que a narrativa sobre a floresta e seus povos tradicionais seja contada pelos próprios paraenses com excelência técnica.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

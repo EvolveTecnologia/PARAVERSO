@@ -1,0 +1,58 @@
+:root {
+  /* Paleta Oficial Governo do Estado do Pará / SECULT */
+  --color-brand-primary: #0072BC;
+  --color-brand-primary-deep: #005CAB;
+  --color-brand-primary-dark: #004884;
+  --color-brand-primary-light: #00A3E0;
+  --color-brand-accent: #DE292E;
+  --color-brand-red: #DE292E;
+  --color-brand-orange: #DE292E; /* Harmonizado com o vermelho da bandeira do Pará */
+  --color-brand-orange-hover: #C8191E;
+  --color-brand-dark: #0A1626;
+  --color-brand-graphite: #132238;
+  --color-brand-offwhite: #F8FAFC;
+}
+
+body {
+  background-color: #0A1626;
+  color: #FFFFFF;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Invisible clean scrollbars across all browsers & webviews */
+.hide-scrollbar,
+.custom-scrollbar,
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.hide-scrollbar::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+/* Smooth gradient utilities & brand classes */
+.bg-brand-primary {
+  background-color: #0072BC;
+}
+.bg-brand-orange {
+  background-color: #DE292E;
+}
+.bg-brand-accent {
+  background-color: #DE292E;
+}
+.text-brand-primary {
+  color: #0072BC;
+}
+.text-brand-orange {
+  color: #DE292E;
+}
+.text-brand-dark {
+  color: #0A1626;
+}

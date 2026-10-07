@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 140" width="850" height="140">
+  <defs>
+    <linearGradient id="paraBlueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0090D6" />
+      <stop offset="100%" stop-color="#005CAB" />
+    </linearGradient>
+    <clipPath id="flagClip">
+      <rect x="0" y="0" width="170" height="110" rx="4" />
+    </clipPath>
+  </defs>
+
+  <!-- Left: SECRETARIA DE CULTURA -->
+  <g transform="translate(10, 15)">
+    <text x="0" y="52" font-family="'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif" font-size="28" font-weight="400" fill="#1A1A1A" letter-spacing="1.5">SECRETARIA DE</text>
+    <text x="0" y="98" font-family="'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif" font-size="44" font-weight="900" fill="#000000" letter-spacing="0.5">CULTURA</text>
+  </g>
+
+  <!-- Center: BANDEIRA DO PARÁ -->
+  <g transform="translate(285, 15)">
+    <g clip-path="url(#flagClip)">
+      <!-- White base / diagonal band -->
+      <rect x="0" y="0" width="170" height="110" fill="#FFFFFF" />
+      
+      <!-- Top-right red triangle -->
+      <polygon points="45,0 170,0 170,85" fill="#DE292E" />
+      
+      <!-- Bottom-left red triangle -->
+      <polygon points="0,25 0,110 125,110" fill="#DE292E" />
+
+      <!-- Center Blue Star -->
+      <polygon points="85,25 93,48 117,48 98,62 105,85 85,71 65,85 72,62 53,48 77,48" fill="#0072BC" />
+    </g>
+    <!-- Subtle crisp border -->
+    <rect x="0" y="0" width="170" height="110" rx="4" fill="none" stroke="#E2E8F0" stroke-width="1.5" />
+  </g>
+
+  <!-- Right: GOVERNO DO PARÁ -->
+  <g transform="translate(485, 15)">
+    <text x="0" y="32" font-family="'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif" font-size="28" font-weight="800" fill="#3D3D3D" letter-spacing="3">GOVERNO DO</text>
+    <text x="0" y="105" font-family="'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif" font-size="92" font-weight="900" fill="url(#paraBlueGrad)" letter-spacing="1">PARÁ</text>
+  </g>
+</svg>
