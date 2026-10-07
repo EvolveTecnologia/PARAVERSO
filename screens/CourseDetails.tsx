@@ -122,6 +122,12 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight uppercase tracking-tight drop-shadow-xl break-words">
             {course.title}
           </h1>
+          {(course.id === 'amazonia-vr-360' || course.title.toLowerCase().includes('360')) && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-[#0072BC]/40 to-[#DE292E]/40 border border-[#00A3E0]/40 rounded-full text-xs font-black text-white uppercase tracking-wider backdrop-blur-md">
+              <span className="w-2 h-2 rounded-full bg-[#00A3E0] animate-ping" />
+              <span>Experiência Imersiva 360° VR • Suporte a Óculos e Giroscópio</span>
+            </div>
+          )}
           <p className="text-[#00A3E0] text-xs sm:text-sm font-bold">
             {course.category} • Curadoria / Direção: {course.instructor}
           </p>

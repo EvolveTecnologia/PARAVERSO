@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   ChevronLeft, Play, Pause, 
   Settings, Check, X, Minimize, Maximize, Languages, Gauge, Globe,
-  Glasses
+  Glasses, Compass, Smartphone, HelpCircle, ExternalLink, RotateCcw,
+  Sparkles, Eye
 } from 'lucide-react';
 import { Lesson } from '../types';
 
@@ -39,6 +40,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
   const [isPlaying, setIsPlaying] = useState(true);
   const [showControls, setShowControls] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [showVrGuide, setShowVrGuide] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -48,6 +50,8 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isVrMode, setIsVrMode] = useState(false);
   const [showVrNotice, setShowVrNotice] = useState(false);
+  const [show360Banner, setShow360Banner] = useState(true);
+  const [gyroscopeActive, setGyroscopeActive] = useState(false);
 
   // References to single and dual players
   const singlePlayerRef = useRef<any>(null);
@@ -64,10 +68,10 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
 
   // Extract YouTube ID
   const getYouTubeId = (url?: string) => {
-    if (!url) return 'p3Qec3Rl_s4';
+    if (!url) return '0dkQxRADDH4';
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : 'p3Qec3Rl_s4';
+    return (match && match[2].length === 11) ? match[2] : '0dkQxRADDH4';
   };
 
   const videoId = getYouTubeId(lesson.videoUrl);
@@ -85,6 +89,22 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
       tag.src = "https://www.youtube.com/iframe_api";
       const firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+  }, []);
+
+  // Ensure iframe permissions for motion sensors and WebXR
+  const applyIframePermissions = useCallback((container: HTMLElement | null) => {
+    if (!container) return;
+    const iframe = container.querySelector('iframe');
+    if (iframe) {
+      iframe.setAttribute(
+        'allow', 
+        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; xr-spatial-tracking; fullscreen'
+      );
+      iframe.setAttribute('allowfullscreen', 'true');
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = 'none';
     }
   }, []);
 
@@ -123,6 +143,32 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
     if (rightMountRef.current) rightMountRef.current.innerHTML = '';
   }, []);
 
+  // Request Gyroscope permission (especially for iOS Safari and mobile browsers)
+  const handleEnableGyroscope = async () => {
+    if (typeof (DeviceOrientationEvent as any)?.requestPermission === 'function') {
+      try {
+        const response = await (DeviceOrientationEvent as any).requestPermission();
+        if (response === 'granted') {
+          setGyroscopeActive(true);
+        }
+      } catch (err) {
+        console.warn('DeviceOrientation permission error:', err);
+      }
+    } else {
+      setGyroscopeActive(true);
+    }
+  };
+
+  // Auto-hide 360 hint banner after 8 seconds
+  useEffect(() => {
+    if (is360Content) {
+      const bannerTimer = setTimeout(() => {
+        setShow360Banner(false);
+      }, 8000);
+      return () => clearTimeout(bannerTimer);
+    }
+  }, [is360Content]);
+
   // Initialize player based on VR mode
   useEffect(() => {
     setIsReady(false);
@@ -146,18 +192,20 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
           videoId: videoId,
           playerVars: {
             autoplay: 1,
-            controls: 0,
+            // For 360 videos, controls: 1 allows the user to see YouTube's native 360 compass and quality selectors
+            controls: is360Content ? 1 : 0,
             rel: 0,
             modestbranding: 1,
             playsinline: 1,
             enablejsapi: 1,
             origin: window.location.origin,
-            fs: 0,
+            fs: 1,
             start: Math.floor(currentTime)
           },
           events: {
             onReady: (event: any) => {
               if (isCancelled) return;
+              applyIframePermissions(singleMountRef.current);
               setIsReady(true);
               setDuration(event.target.getDuration());
               if (currentTime > 0) {
@@ -181,6 +229,9 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
             }
           }
         });
+
+        // Set attributes right after mounting
+        setTimeout(() => applyIframePermissions(singleMountRef.current), 300);
       } else {
         // Initialize Dual Players for VR Stereoscopic Split-Screen
         if (!leftMountRef.current || !rightMountRef.current) return;
@@ -203,6 +254,9 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
         const checkBothReady = () => {
           if (leftReady && rightReady && !isCancelled) {
             setIsReady(true);
+            applyIframePermissions(leftMountRef.current);
+            applyIframePermissions(rightMountRef.current);
+
             if (leftPlayerRef.current?.getDuration) {
               setDuration(leftPlayerRef.current.getDuration());
             }
@@ -285,6 +339,11 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
             }
           }
         });
+
+        setTimeout(() => {
+          applyIframePermissions(leftMountRef.current);
+          applyIframePermissions(rightMountRef.current);
+        }, 300);
       }
     };
 
@@ -295,47 +354,42 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
       } else {
         window.onYouTubeIframeAPIReady = createPlayers;
       }
-    }, 50);
+    }, 60);
 
     return () => {
       isCancelled = true;
       clearTimeout(timer);
       destroyAllPlayers();
     };
-  }, [isVrMode, lesson.id, videoId, destroyAllPlayers]);
+  }, [videoId, isVrMode, destroyAllPlayers, applyIframePermissions, is360Content]);
 
-  // Periodic Time Sync
+  // Sync playback time loop
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!isReady || !isPlaying) return;
-
-      try {
+      if (isPlaying) {
         if (!isVrMode && singlePlayerRef.current?.getCurrentTime) {
-          const time = singlePlayerRef.current.getCurrentTime();
-          setCurrentTime(time);
-          if (onProgressUpdate) onProgressUpdate(lesson.id, time);
+          const t = singlePlayerRef.current.getCurrentTime();
+          setCurrentTime(t);
+          if (onProgressUpdate) onProgressUpdate(lesson.id, t);
         } else if (isVrMode && leftPlayerRef.current?.getCurrentTime) {
-          const time = leftPlayerRef.current.getCurrentTime();
-          setCurrentTime(time);
-          if (onProgressUpdate) onProgressUpdate(lesson.id, time);
+          const t = leftPlayerRef.current.getCurrentTime();
+          setCurrentTime(t);
+          if (onProgressUpdate) onProgressUpdate(lesson.id, t);
 
-          // Drift correction between left and right players
+          // Periodic sync drift correction between left and right eyes
           if (rightPlayerRef.current?.getCurrentTime) {
             const rightTime = rightPlayerRef.current.getCurrentTime();
-            if (Math.abs(time - rightTime) > 0.4) {
-              rightPlayerRef.current.seekTo(time, true);
+            if (Math.abs(t - rightTime) > 0.3) {
+              rightPlayerRef.current.seekTo(t, true);
             }
           }
         }
-      } catch (e) {
-        // ignore sync tick errors
       }
     }, 1000);
-
     return () => clearInterval(interval);
-  }, [isReady, isPlaying, isVrMode, lesson.id, onProgressUpdate]);
+  }, [isPlaying, isVrMode, lesson.id, onProgressUpdate]);
 
-  // Fullscreen change listener
+  // Fullscreen state watcher
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -344,16 +398,15 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Controls Visibility Timeout
   const triggerControls = () => {
     setShowControls(true);
     if (hideControlsTimeout.current) clearTimeout(hideControlsTimeout.current);
     if (isPlaying) {
       hideControlsTimeout.current = setTimeout(() => {
-        if (!showSettings) {
+        if (!showSettings && !showVrGuide) {
           setShowControls(false);
         }
-      }, isVrMode ? 3000 : 4000);
+      }, isVrMode ? 3500 : 4500);
     }
   };
 
@@ -411,7 +464,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
 
     if (nextMode) {
       setShowVrNotice(true);
-      setTimeout(() => setShowVrNotice(false), 4000);
+      setTimeout(() => setShowVrNotice(false), 4500);
       if (containerRef.current && !document.fullscreenElement) {
         containerRef.current.requestFullscreen().catch(() => {});
       }
@@ -424,6 +477,10 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  const openNativeYouTubeVR = () => {
+    window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+  };
+
   return (
     <div 
       ref={containerRef}
@@ -433,24 +490,50 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
     >
       {/* VR Orientation / Headset Notice Banner */}
       {showVrNotice && (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[350] bg-[#0072BC]/95 text-white px-5 py-3 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/20 flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-none">
-          <Glasses className="text-white animate-pulse" size={24} />
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[350] bg-gradient-to-r from-[#0072BC] to-[#DE292E] text-white px-6 py-3.5 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/30 flex items-center gap-3.5 animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-none">
+          <Glasses className="text-white animate-bounce" size={26} />
           <div className="text-left">
             <p className="text-xs font-black uppercase tracking-wider">Modo Óculos VR Ativado</p>
-            <p className="text-[11px] text-gray-200">Gire o smartphone na horizontal e insira no seu óculos VR / Cardboard.</p>
+            <p className="text-[11px] text-white/90">Gire o smartphone na horizontal e insira no seu óculos VR / Cardboard.</p>
           </div>
         </div>
       )}
 
-      {/* Main Video Viewport Layer (Both exist statically in React DOM to prevent removeChild crash) */}
+      {/* 360 Interactive Navigation Initial Hint Banner */}
+      {is360Content && show360Banner && !isVrMode && (
+        <div className="absolute top-20 sm:top-24 left-1/2 -translate-x-1/2 z-[340] max-w-lg w-[90%] bg-[#0A1626]/95 border border-[#00A3E0]/40 rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#0072BC]/20 border border-[#00A3E0]/30 flex items-center justify-center flex-shrink-0 text-[#00A3E0]">
+              <Compass size={22} className="animate-spin" style={{ animationDuration: '8s' }} />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-white flex items-center gap-2">
+                Experiência 360° em Realidade Virtual
+                <span className="text-[9px] bg-[#DE292E] text-white px-1.5 py-0.5 rounded font-black uppercase">VR</span>
+              </p>
+              <p className="text-[11px] text-gray-300">
+                Arraste a tela com o mouse/dedo ou mova o smartphone para explorar todos os ângulos da Amazônia.
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={(e) => { e.stopPropagation(); setShow360Banner(false); }}
+            className="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors flex-shrink-0 cursor-pointer"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Main Video Viewport Layer */}
       
-      {/* Standard Single Screen View */}
+      {/* Standard Single Screen View (with unrestricted pointer events for 360 drag) */}
       <div 
         className={`relative w-full h-full flex items-center justify-center ${isVrMode ? 'hidden' : 'block'}`}
       >
         <div 
           ref={singleMountRef}
-          className="w-full h-full pointer-events-none"
+          className="w-full h-full"
         />
       </div>
 
@@ -462,7 +545,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
         <div className="relative flex-1 h-full border-r border-black overflow-hidden flex items-center justify-center bg-black">
           <div 
             ref={leftMountRef}
-            className="w-full h-full pointer-events-none scale-[1.03]"
+            className="w-full h-full scale-[1.03]"
           />
           {/* Left Eye Optical Center Reticle */}
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-30">
@@ -471,14 +554,14 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
             </div>
           </div>
           {/* Left Eye Label */}
-          <div className="absolute top-4 left-4 z-20 pointer-events-none opacity-40">
-            <span className="text-[10px] font-bold tracking-widest text-white/70 bg-black/60 px-2 py-0.5 rounded uppercase">
+          <div className="absolute top-4 left-4 z-20 pointer-events-none opacity-50">
+            <span className="text-[10px] font-bold tracking-widest text-white/90 bg-black/70 px-2 py-0.5 rounded uppercase border border-white/10">
               Olho Esquerdo
             </span>
           </div>
         </div>
 
-        {/* Central Physical Alignment Divider Line */}
+        {/* Central Physical Alignment Divider Line (Prevents visual cross-bleeding in VR headsets) */}
         <div className="relative w-2 sm:w-3 bg-black z-30 flex flex-col items-center justify-between py-6 pointer-events-none border-x border-white/10">
           <div className="w-1 h-6 bg-white/30 rounded-full" />
           <div className="flex flex-col items-center gap-1">
@@ -492,7 +575,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
         <div className="relative flex-1 h-full border-l border-black overflow-hidden flex items-center justify-center bg-black">
           <div 
             ref={rightMountRef}
-            className="w-full h-full pointer-events-none scale-[1.03]"
+            className="w-full h-full scale-[1.03]"
           />
           {/* Right Eye Optical Center Reticle */}
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-30">
@@ -501,25 +584,19 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
             </div>
           </div>
           {/* Right Eye Label */}
-          <div className="absolute top-4 right-4 z-20 pointer-events-none opacity-40">
-            <span className="text-[10px] font-bold tracking-widest text-white/70 bg-black/60 px-2 py-0.5 rounded uppercase">
+          <div className="absolute top-4 right-4 z-20 pointer-events-none opacity-50">
+            <span className="text-[10px] font-bold tracking-widest text-white/90 bg-black/70 px-2 py-0.5 rounded uppercase border border-white/10">
               Olho Direito
             </span>
           </div>
         </div>
       </div>
 
-      {/* Backdrop for click controls */}
-      <div 
-        onClick={togglePlay}
-        className="absolute inset-0 z-10 cursor-pointer" 
-      />
-
       {/* Custom Overlay Controls */}
       <div className={`absolute inset-0 z-20 flex flex-col justify-between transition-opacity duration-300 pointer-events-none ${showControls ? 'opacity-100' : 'opacity-0'}`}>
         
         {/* Top Bar */}
-        <div className="p-4 sm:p-6 md:p-8 flex items-center justify-between bg-gradient-to-b from-black/85 via-black/50 to-transparent">
+        <div className="p-4 sm:p-6 md:p-8 flex items-center justify-between bg-gradient-to-b from-black/90 via-black/60 to-transparent">
           <div className="flex items-center gap-3 sm:gap-4 pointer-events-auto">
             <button 
               onClick={(e) => { e.stopPropagation(); onBack(); }} 
@@ -534,7 +611,8 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
                   {lesson.title}
                 </h1>
                 {is360Content && (
-                  <span className="px-2 py-0.5 bg-[#DE292E] text-white text-[9px] font-black uppercase tracking-wider rounded-md">
+                  <span className="px-2 py-0.5 bg-gradient-to-r from-[#0072BC] to-[#DE292E] text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-sm flex items-center gap-1">
+                    <Sparkles size={10} />
                     360° VR
                   </span>
                 )}
@@ -546,14 +624,42 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
           </div>
 
           <div className="flex items-center gap-2 pointer-events-auto">
-            {/* VR Mode Toggle Button */}
+            {/* 360 Help & Guide Button */}
+            {is360Content && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowVrGuide(true); }}
+                className="px-2.5 py-2 bg-white/10 hover:bg-white/20 border border-white/15 rounded-full text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer backdrop-blur-xl"
+                title="Como usar em Realidade Virtual 360°"
+              >
+                <HelpCircle size={16} className="text-[#00A3E0]" />
+                <span className="hidden md:inline">Guia VR</span>
+              </button>
+            )}
+
+            {/* Mobile Gyroscope Activator */}
+            {is360Content && !isVrMode && (
+              <button
+                onClick={(e) => { e.stopPropagation(); handleEnableGyroscope(); }}
+                className={`px-2.5 py-2 rounded-full text-xs font-bold uppercase tracking-wider border flex items-center gap-1.5 transition-all cursor-pointer backdrop-blur-xl ${
+                  gyroscopeActive 
+                    ? 'bg-emerald-600/80 border-emerald-400 text-white' 
+                    : 'bg-white/10 hover:bg-white/20 border-white/15 text-white'
+                }`}
+                title="Ativar Giroscópio / Sensor de Movimento"
+              >
+                <Smartphone size={16} className={gyroscopeActive ? 'text-white' : 'text-[#00A3E0]'} />
+                <span className="hidden md:inline">{gyroscopeActive ? 'Giroscópio Ativo' : 'Giroscópio'}</span>
+              </button>
+            )}
+
+            {/* VR Mode Toggle Button (Stereoscopic Split-Screen) */}
             <button 
               onClick={toggleVrMode} 
               className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-full text-xs font-black uppercase tracking-wider border flex items-center gap-2 transition-all cursor-pointer backdrop-blur-xl shadow-lg ${
                 isVrMode 
                   ? 'bg-[#DE292E] hover:bg-[#C8191E] border-white/40 text-white scale-105 shadow-[#DE292E]/40' 
                   : is360Content 
-                    ? 'bg-[#0072BC]/90 hover:bg-[#0072BC] border-[#00A3E0] text-white animate-pulse' 
+                    ? 'bg-[#0072BC]/95 hover:bg-[#005CAB] border-[#00A3E0] text-white' 
                     : 'bg-white/10 hover:bg-white/20 border-white/15 text-white'
               }`}
               title={isVrMode ? "Sair do Modo Óculos VR" : "Ativar Modo Óculos VR Estereoscópico"}
@@ -567,6 +673,17 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
               </span>
             </button>
 
+            {/* Open in YouTube VR App button */}
+            {is360Content && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); openNativeYouTubeVR(); }}
+                className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full text-white border border-white/10 cursor-pointer transition-colors"
+                title="Abrir no YouTube VR / App Nativo"
+              >
+                <ExternalLink size={17} />
+              </button>
+            )}
+
             {/* Settings Button */}
             <button 
               onClick={(e) => { e.stopPropagation(); setShowSettings(true); }} 
@@ -578,7 +695,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
           </div>
         </div>
 
-        {/* Central Play/Pause button */}
+        {/* Central Play/Pause button (Visible when paused or controls toggled) */}
         <div className="flex items-center justify-center pointer-events-auto">
           <button 
             onClick={togglePlay} 
@@ -591,7 +708,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
         </div>
 
         {/* Bottom Bar */}
-        <div className="p-4 sm:p-6 md:p-8 space-y-3 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
+        <div className="p-4 sm:p-6 md:p-8 space-y-3 bg-gradient-to-t from-black/95 via-black/70 to-transparent">
           {/* Seek Range Bar */}
           <div className="px-2 pointer-events-auto">
             <input 
@@ -613,8 +730,13 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
               <span className="opacity-70">{formatTime(duration)}</span>
               {playbackSpeed !== 1 && <span className="text-[#DE292E] ml-1">{playbackSpeed}x</span>}
               {isVrMode && (
-                <span className="ml-1 px-1.5 py-0.5 bg-[#DE292E] text-white text-[9px] font-black rounded">
+                <span className="ml-1 px-1.5 py-0.5 bg-[#DE292E] text-white text-[9px] font-black rounded uppercase">
                   VR SPLIT
+                </span>
+              )}
+              {is360Content && !isVrMode && (
+                <span className="ml-1 px-1.5 py-0.5 bg-[#0072BC] text-white text-[9px] font-black rounded uppercase">
+                  360° LIVE
                 </span>
               )}
             </div>
@@ -652,6 +774,99 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
           </div>
         </div>
       </div>
+
+      {/* VR Interactive Guide Modal */}
+      {showVrGuide && (
+        <div 
+          onClick={() => setShowVrGuide(false)}
+          className="fixed inset-0 z-[400] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-xl bg-[#0A1626] border border-white/15 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#0072BC]/20 border border-[#00A3E0]/30 flex items-center justify-center text-[#00A3E0]">
+                  <Glasses size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-white uppercase tracking-wider">
+                    Como Assistir em Realidade Virtual 360°
+                  </h3>
+                  <p className="text-[11px] text-gray-400">Guia de Experiência Imersiva no PARAVERSO</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowVrGuide(false)}
+                className="p-2 text-gray-400 hover:text-white rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Option 1: Desktop */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#0072BC]/20 flex items-center justify-center text-[#00A3E0]">
+                  <Compass size={18} />
+                </div>
+                <h4 className="text-xs font-bold text-white uppercase">1. No Computador</h4>
+                <p className="text-[11px] text-gray-300 leading-relaxed">
+                  Clique com o mouse sobre o vídeo e arraste em qualquer direção. Você também pode usar as teclas <strong className="text-white">W, A, S, D</strong> para navegar 360°.
+                </p>
+              </div>
+
+              {/* Option 2: Mobile Gyro */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <Smartphone size={18} />
+                </div>
+                <h4 className="text-xs font-bold text-white uppercase">2. No Celular</h4>
+                <p className="text-[11px] text-gray-300 leading-relaxed">
+                  Coloque em tela cheia e mova o celular ao redor. O giroscópio acompanha os movimentos da sua cabeça pelo espaço.
+                </p>
+              </div>
+
+              {/* Option 3: VR Headset */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#DE292E]/20 flex items-center justify-center text-[#DE292E]">
+                  <Glasses size={18} />
+                </div>
+                <h4 className="text-xs font-bold text-white uppercase">3. Óculos VR</h4>
+                <p className="text-[11px] text-gray-300 leading-relaxed">
+                  Ative o botão <strong className="text-[#DE292E]">Modo Óculos VR</strong> para visão estereoscópica dividida em duas lentes (Google Cardboard / VR Box).
+                </p>
+              </div>
+            </div>
+
+            {/* VR Actions */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+              <button
+                onClick={() => {
+                  setShowVrGuide(false);
+                  toggleVrMode();
+                }}
+                className="w-full sm:w-1/2 py-3 bg-[#DE292E] hover:bg-[#C8191E] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#DE292E]/25"
+              >
+                <Glasses size={16} />
+                <span>Iniciar Modo Óculos VR</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowVrGuide(false);
+                  openNativeYouTubeVR();
+                }}
+                className="w-full sm:w-1/2 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer border border-white/15"
+              >
+                <ExternalLink size={16} />
+                <span>Abrir no App YouTube VR</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Settings Drawer */}
       <div className={`absolute inset-0 z-[300] bg-black/50 backdrop-blur-sm transition-all duration-300 flex items-center justify-end ${showSettings ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>

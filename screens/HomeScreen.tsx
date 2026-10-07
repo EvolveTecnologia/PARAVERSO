@@ -178,6 +178,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCourseClick, onCategoryClick,
                     <span className="px-2.5 py-0.5 bg-[#0072BC] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider rounded-md shadow-sm">
                       {slide.category}
                     </span>
+                    {slide.id === 'amazonia-vr-360' && (
+                      <span className="px-2.5 py-0.5 bg-gradient-to-r from-[#DE292E] to-[#FF5A5F] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider rounded-md shadow-sm flex items-center gap-1">
+                        🌟 360° VR
+                      </span>
+                    )}
                     <span className="text-[10px] sm:text-xs font-bold text-gray-300 uppercase tracking-widest hidden sm:inline">
                       {slide.subtitle}
                     </span>
