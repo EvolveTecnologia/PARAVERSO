@@ -18,7 +18,7 @@ const TermsPage: React.FC<TermsPageProps> = ({ onBack, onViewChange }) => {
           <ArrowLeft size={16} /> Voltar ao Início
         </button>
         <span className="text-xs font-bold text-[#DE292E] uppercase tracking-widest">
-          PARAVERSO • SECULT-PA
+          Termos de Uso • SECULT-PA
         </span>
       </nav>
 

@@ -52,7 +52,7 @@ export const Logo: React.FC<LogoProps> = ({
 
   if (variant === 'stacked') {
     return (
-      <div className={`inline-flex flex-col items-center justify-center select-none gap-2 ${className}`}>
+      <div className={`inline-flex flex-col items-center justify-center select-none ${className}`}>
         <img 
           src={logoSrc} 
           alt="Secretaria de Cultura - Governo do Pará" 
@@ -62,24 +62,14 @@ export const Logo: React.FC<LogoProps> = ({
             (e.target as HTMLImageElement).src = logoSvgSrc;
           }}
         />
-        {showPlatformTitle && (
-          <div className="flex flex-col items-center">
-            <span className={`font-black tracking-widest text-lg sm:text-xl ${inverted ? 'text-white' : 'text-[#0A1626]'}`}>
-              PARAVERSO
-            </span>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-[#00A3E0]">
-              STREAMING &amp; REALIDADE VIRTUAL
-            </span>
-          </div>
-        )}
       </div>
     );
   }
 
   // Horizontal variant (default)
   return (
-    <div className={`inline-flex items-center gap-3 select-none ${className}`}>
-      {/* Official Government of Pará / SECULT Logo from attached image */}
+    <div className={`inline-flex items-center select-none ${className}`}>
+      {/* Official Government of Pará / SECULT Logo */}
       <img 
         src={logoSrc} 
         alt="Secretaria de Cultura • Governo do Pará" 
@@ -89,20 +79,6 @@ export const Logo: React.FC<LogoProps> = ({
           (e.target as HTMLImageElement).src = logoSvgSrc;
         }}
       />
-
-      {/* Sleek platform divider & PARAVERSO Badge */}
-      {showPlatformTitle && (
-        <div className="hidden xs:flex sm:flex items-center gap-2.5 pl-2.5 border-l border-white/20">
-          <div className="flex flex-col justify-center">
-            <span className={`font-black tracking-wider text-base sm:text-lg leading-none ${inverted ? 'text-white' : 'text-[#0A1626]'}`}>
-              PARAVERSO
-            </span>
-            <span className="text-[9px] uppercase font-extrabold tracking-widest text-[#00A3E0] leading-tight pt-0.5">
-              SECULT-PA
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -73,7 +73,7 @@ const LandingFooter: React.FC<LandingFooterProps> = ({ onViewChange }) => {
       <div className="max-w-7xl mx-auto border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-gray-400">
         <p>Copyright © 2026 Governo do Estado do Pará • SECULT-PA. {t.rightsReserved}</p>
         <p className="text-gray-400 text-[11px]">
-          PARAVERSO • Tecnologia, Cultura &amp; Memória Amazônica.
+          Tecnologia, Cultura &amp; Memória Amazônica.
         </p>
       </div>
     </footer>
