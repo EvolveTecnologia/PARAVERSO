@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { COURSES } from '../constants';
 import { Category } from '../types';
 import CourseCard from '../components/CourseCard';
-import { Landmark, Sparkles, Globe, Leaf, Utensils, Briefcase, Check, Plus, Play, ArrowRight, PartyPopper, Film } from 'lucide-react';
+import { Landmark, Sparkles, Globe, Leaf, Utensils, Briefcase, Check, Plus, Play, ArrowRight, PartyPopper, Film, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -16,6 +16,10 @@ interface HomeScreenProps {
 const HomeScreen: React.FC<HomeScreenProps> = ({ onCourseClick, onCategoryClick, myListIds = [], onToggleMyList }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const isDragging = useRef<boolean>(false);
+  const dragDistance = useRef<number>(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { t } = useLanguage();
 
   const slides = [
@@ -70,30 +74,91 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCourseClick, onCategoryClick,
     { id: Category.Gestao, label: 'GESTÃO CULTURAL', icon: Briefcase, color: 'from-[#0A1626]/60 to-[#0072BC]/60' },
   ];
 
-  useEffect(() => {
-    const timer = setInterval(() => {
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 8000);
-    return () => clearInterval(timer);
   }, [slides.length]);
 
+  useEffect(() => {
+    resetTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [resetTimer]);
+
+  const handleNextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    resetTimer();
+  };
+
+  const handlePrevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    resetTimer();
+  };
+
+  // Touch Swipe Handlers for Mobile & Tablet Banners
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    isDragging.current = true;
+    dragDistance.current = 0;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging.current || touchStartX.current === null) return;
+    const currentX = e.touches[0].clientX;
+    dragDistance.current = touchStartX.current - currentX;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
+    if (!isDragging.current || touchStartX.current === null) return;
     const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartX.current - touchEndX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchStartX.current - touchEndX;
+    const diffY = touchStartY.current !== null ? touchStartY.current - touchEndY : 0;
 
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
+    // Check if horizontal swipe is intentional and exceeds vertical movement
+    if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 0) {
+        handleNextSlide();
       } else {
-        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+        handlePrevSlide();
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isDragging.current = false;
+  };
+
+  // Mouse Drag support for Desktop / Preview testing
+  const handleMouseDown = (e: React.MouseEvent) => {
+    touchStartX.current = e.clientX;
+    touchStartY.current = e.clientY;
+    isDragging.current = true;
+    dragDistance.current = 0;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current || touchStartX.current === null) return;
+    dragDistance.current = touchStartX.current - e.clientX;
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isDragging.current || touchStartX.current === null) return;
+    const diffX = touchStartX.current - e.clientX;
+    if (Math.abs(diffX) > 40) {
+      if (diffX > 0) {
+        handleNextSlide();
+      } else {
+        handlePrevSlide();
       }
     }
     touchStartX.current = null;
+    touchStartY.current = null;
+    isDragging.current = false;
   };
 
   const CONTENT_PADDING = "px-4 sm:px-6 md:px-10";
@@ -117,9 +182,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCourseClick, onCategoryClick,
           </button>
         </div>
         <div className="relative">
-          <div className={`flex gap-3 md:gap-4 overflow-x-auto hide-scrollbar py-2 ${CONTENT_PADDING} scroll-smooth items-start`}>
+          {/* Mobile & Tablet Card Row with Vertical Poster Aspect Model */}
+          <div className={`flex gap-3 sm:gap-4 md:gap-5 overflow-x-auto hide-scrollbar py-2 ${CONTENT_PADDING} scroll-smooth items-start`}>
             {courses.map(course => (
-              <div key={course.id} className="w-40 sm:w-52 md:w-64 lg:w-72 flex-shrink-0">
+              <div key={course.id} className="w-32 sm:w-40 md:w-48 lg:w-56 flex-shrink-0">
                 <CourseCard course={course} onClick={onCourseClick} />
               </div>
             ))}
@@ -141,11 +207,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCourseClick, onCategoryClick,
         </div>
       </div>
 
-      {/* Hero Banner Area */}
+      {/* Hero Banner Area - Touch Swipable on Mobile and Tablet */}
       <div 
-        className="relative w-full h-[52vh] sm:h-[60vh] md:h-[72vh] overflow-hidden group mb-6 md:mb-8"
+        className="relative w-full h-[54vh] sm:h-[62vh] md:h-[72vh] overflow-hidden group mb-6 md:mb-8 select-none touch-pan-y cursor-grab active:cursor-grabbing"
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
       >
         {slides.map((slide, index) => {
           const isInList = myListIds.includes(slide.id);
@@ -161,18 +231,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCourseClick, onCategoryClick,
               <div className="absolute inset-0">
                 <img 
                   src={slide.image} 
-                  className="w-full h-full object-cover select-none animate-ken-burns"
+                  className="w-full h-full object-cover select-none animate-ken-burns pointer-events-auto"
                   alt={slide.title}
                   draggable={false}
-                  onClick={() => onCourseClick(slide.id)}
+                  onClick={() => {
+                    if (Math.abs(dragDistance.current) < 15) {
+                      onCourseClick(slide.id);
+                    }
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#0A1626] via-[#0A1626]/85 to-transparent w-[95%] md:w-3/4 pointer-events-none" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0A1626] via-transparent to-transparent pointer-events-none" />
               </div>
               
               {/* Text Content */}
-              <div className={`absolute bottom-12 md:top-0 md:bottom-0 left-0 w-full md:w-[55%] flex flex-col justify-end md:justify-center z-20 ${CONTENT_PADDING}`}>
-                <div className="animate-in slide-in-from-left-10 fade-in duration-700 delay-100 space-y-2.5 md:space-y-4">
+              <div className={`absolute bottom-12 md:top-0 md:bottom-0 left-0 w-full md:w-[55%] flex flex-col justify-end md:justify-center z-20 ${CONTENT_PADDING} pointer-events-none`}>
+                <div className="animate-in slide-in-from-left-10 fade-in duration-700 delay-100 space-y-2.5 md:space-y-4 pointer-events-auto">
                   
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-0.5 bg-[#0072BC] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider rounded-md shadow-sm">
@@ -198,7 +272,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCourseClick, onCategoryClick,
 
                   <div className="flex items-center gap-3 pt-2">
                     <button
-                      onClick={() => onCourseClick(slide.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onCourseClick(slide.id);
+                      }}
                       className="px-5 sm:px-7 py-2.5 sm:py-3 bg-[#DE292E] hover:bg-[#C8191E] text-white rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg shadow-[#DE292E]/25 hover:scale-105 active:scale-95 cursor-pointer"
                     >
                       <Play size={16} fill="white" />
@@ -207,7 +284,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCourseClick, onCategoryClick,
 
                     {onToggleMyList && (
                       <button
-                        onClick={() => onToggleMyList(slide.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleMyList(slide.id);
+                        }}
                         className={`px-4 sm:px-5 py-2.5 sm:py-3 border rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
                           isInList
                             ? 'bg-white/20 border-white text-white'
@@ -226,12 +306,33 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCourseClick, onCategoryClick,
           );
         })}
 
+        {/* Touch & Click Navigation Chevron Controls for Tablets & Desktops */}
+        <button 
+          onClick={(e) => { e.stopPropagation(); handlePrevSlide(); }}
+          className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/40 hover:bg-black/75 text-white items-center justify-center backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 transition-all cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+          aria-label="Slide anterior"
+        >
+          <ChevronLeft size={22} />
+        </button>
+
+        <button 
+          onClick={(e) => { e.stopPropagation(); handleNextSlide(); }}
+          className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/40 hover:bg-black/75 text-white items-center justify-center backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 transition-all cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+          aria-label="Próximo slide"
+        >
+          <ChevronRight size={22} />
+        </button>
+
         {/* Indicators */}
         <div className="absolute bottom-6 right-6 z-20 flex gap-2">
           {slides.map((_, i) => (
             <button
               key={i} 
-              onClick={(e) => { e.stopPropagation(); setCurrentSlide(i); }}
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                setCurrentSlide(i); 
+                resetTimer();
+              }}
               className={`h-1.5 rounded-full transition-all duration-300 shadow-sm cursor-pointer ${
                 i === currentSlide ? 'w-6 sm:w-8 bg-[#DE292E]' : 'w-2 bg-gray-500 hover:bg-gray-300'
               }`}

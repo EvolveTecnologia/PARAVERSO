@@ -1,6 +1,6 @@
 import React from 'react';
 import { Course } from '../types';
-import { Play } from 'lucide-react';
+import { Play, Sparkles } from 'lucide-react';
 
 interface CourseCardProps {
   course: Course;
@@ -8,20 +8,23 @@ interface CourseCardProps {
 }
 
 const CourseCard: React.FC<CourseCardProps> = ({ course, onClick }) => {
+  const is360 = course.id === 'amazonia-vr-360' || course.title.toLowerCase().includes('360');
+
   return (
     <div 
-      className="flex-shrink-0 w-full cursor-pointer group/card relative outline-none focus:outline-none z-0 hover:z-50 focus:z-50"
+      className="flex-shrink-0 w-full cursor-pointer group/card relative outline-none focus:outline-none z-0 hover:z-30 focus:z-30 transition-transform duration-200"
       onClick={() => onClick(course.id)}
       tabIndex={0}
       role="button"
     >
-      <div className="relative aspect-[16/10] sm:aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-[#132238] shadow-md transition-all duration-300 ease-out transform origin-center group-hover/card:scale-[1.04] ring-0 group-hover/card:ring-[2px] ring-[#00A3E0]">
+      {/* Poster Image Container - Mobile & Tablet Vertical Poster Aspect Ratio */}
+      <div className="relative aspect-[2/3] rounded-xl sm:rounded-2xl overflow-hidden bg-[#0D1B2E] border border-white/10 shadow-md group-hover/card:shadow-xl group-hover/card:shadow-black/60 transition-all duration-300 ease-out transform origin-center group-hover/card:scale-[1.03] group-hover/card:border-[#00A3E0]/70 group-hover/card:ring-2 group-hover/card:ring-[#00A3E0]/40">
         
         {/* Background Image */}
         <img 
-          src={course.heroImage || course.thumbnail} 
+          src={course.thumbnail || course.heroImage} 
           alt={course.title}
-          className="w-full h-full object-cover transition-opacity duration-300 opacity-90 group-hover/card:opacity-100"
+          className="w-full h-full object-cover transition-all duration-500 opacity-90 group-hover/card:opacity-100 group-hover/card:scale-105"
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={(e) => {
@@ -29,13 +32,32 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, onClick }) => {
           }}
         />
         
-        {/* Gradient Overlay */}
-        <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#0A1626]/90 via-transparent to-transparent opacity-70 group-hover/card:opacity-40 transition-opacity duration-300" />
-        <div className="md:hidden absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 opacity-60" />
+        {/* Cinematic Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A1626]/95 via-transparent to-black/30 opacity-80 group-hover/card:opacity-60 transition-opacity duration-300 pointer-events-none" />
 
-        {/* Play Button - Vermelho da bandeira do Pará */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 hidden md:flex">
-          <div className="w-11 h-11 bg-[#DE292E] rounded-full flex items-center justify-center shadow-lg transform scale-75 group-hover/card:scale-100 transition-transform duration-300 ease-out">
+        {/* Badges Overlay at Top */}
+        <div className="absolute top-2 left-2 right-2 flex items-center justify-between gap-1 pointer-events-none z-10">
+          {is360 ? (
+            <span className="px-2 py-0.5 bg-gradient-to-r from-[#DE292E] to-[#FF5A5F] text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider rounded-md shadow-md flex items-center gap-1">
+              <Sparkles size={10} />
+              360° VR
+            </span>
+          ) : (
+            <span className="px-1.5 py-0.5 bg-[#0072BC]/90 backdrop-blur-md text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider rounded-md shadow-sm border border-white/15">
+              {course.category.split(' ')[0]}
+            </span>
+          )}
+
+          {course.duration && (
+            <span className="px-1.5 py-0.5 bg-black/60 backdrop-blur-md text-gray-200 text-[9px] sm:text-[10px] font-bold rounded-md border border-white/10 ml-auto">
+              {course.duration}
+            </span>
+          )}
+        </div>
+
+        {/* Play Button Icon on Hover/Active */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 pointer-events-none">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#DE292E] rounded-full flex items-center justify-center shadow-xl transform scale-75 group-hover/card:scale-100 transition-transform duration-300 ease-out border border-white/30">
             <Play size={18} className="text-white fill-white ml-0.5" />
           </div>
         </div>
@@ -51,14 +73,21 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, onClick }) => {
         )}
       </div>
 
-      {/* Meta Data */}
+      {/* Typography & Metadata */}
       <div className="mt-2 px-0.5 transition-all duration-300">
-        <h3 className="text-xs sm:text-sm font-semibold leading-snug text-gray-200 group-hover/card:text-white transition-colors line-clamp-2">
+        <h3 className="text-xs sm:text-sm font-bold leading-snug text-gray-100 group-hover/card:text-[#00A3E0] transition-colors line-clamp-2">
           {course.title}
         </h3>
-        <p className="text-[10px] sm:text-[11px] text-[#00A3E0] mt-0.5 line-clamp-1 font-medium">
-          {course.category}
-        </p>
+        <div className="flex items-center justify-between gap-1 mt-0.5">
+          <p className="text-[10px] sm:text-[11px] text-[#00A3E0] font-semibold line-clamp-1">
+            {course.category}
+          </p>
+          {course.modulesCount > 0 && (
+            <span className="text-[9px] sm:text-[10px] text-gray-400 font-medium whitespace-nowrap">
+              {course.modulesCount} {course.modulesCount === 1 ? 'módulo' : 'módulos'}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

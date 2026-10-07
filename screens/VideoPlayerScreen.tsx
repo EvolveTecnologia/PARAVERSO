@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   ChevronLeft, Play, Pause, 
   Settings, Check, X, Minimize, Maximize, Languages, Gauge, Globe,
-  Glasses, Compass, Smartphone, HelpCircle, ExternalLink, RotateCcw,
+  Glasses, Compass, RotateCcw,
   Sparkles, Eye
 } from 'lucide-react';
 import { Lesson } from '../types';
@@ -40,7 +40,6 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
   const [isPlaying, setIsPlaying] = useState(true);
   const [showControls, setShowControls] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
-  const [showVrGuide, setShowVrGuide] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -51,7 +50,6 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
   const [isVrMode, setIsVrMode] = useState(false);
   const [showVrNotice, setShowVrNotice] = useState(false);
   const [show360Banner, setShow360Banner] = useState(true);
-  const [gyroscopeActive, setGyroscopeActive] = useState(false);
 
   // References to single and dual players
   const singlePlayerRef = useRef<any>(null);
@@ -142,22 +140,6 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
     if (leftMountRef.current) leftMountRef.current.innerHTML = '';
     if (rightMountRef.current) rightMountRef.current.innerHTML = '';
   }, []);
-
-  // Request Gyroscope permission (especially for iOS Safari and mobile browsers)
-  const handleEnableGyroscope = async () => {
-    if (typeof (DeviceOrientationEvent as any)?.requestPermission === 'function') {
-      try {
-        const response = await (DeviceOrientationEvent as any).requestPermission();
-        if (response === 'granted') {
-          setGyroscopeActive(true);
-        }
-      } catch (err) {
-        console.warn('DeviceOrientation permission error:', err);
-      }
-    } else {
-      setGyroscopeActive(true);
-    }
-  };
 
   // Auto-hide 360 hint banner after 8 seconds
   useEffect(() => {
@@ -403,7 +385,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
     if (hideControlsTimeout.current) clearTimeout(hideControlsTimeout.current);
     if (isPlaying) {
       hideControlsTimeout.current = setTimeout(() => {
-        if (!showSettings && !showVrGuide) {
+        if (!showSettings) {
           setShowControls(false);
         }
       }, isVrMode ? 3500 : 4500);
@@ -475,10 +457,6 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-
-  const openNativeYouTubeVR = () => {
-    window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
   };
 
   return (
@@ -624,35 +602,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
           </div>
 
           <div className="flex items-center gap-2 pointer-events-auto">
-            {/* 360 Help & Guide Button */}
-            {is360Content && (
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowVrGuide(true); }}
-                className="px-2.5 py-2 bg-white/10 hover:bg-white/20 border border-white/15 rounded-full text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer backdrop-blur-xl"
-                title="Como usar em Realidade Virtual 360°"
-              >
-                <HelpCircle size={16} className="text-[#00A3E0]" />
-                <span className="hidden md:inline">Guia VR</span>
-              </button>
-            )}
-
-            {/* Mobile Gyroscope Activator */}
-            {is360Content && !isVrMode && (
-              <button
-                onClick={(e) => { e.stopPropagation(); handleEnableGyroscope(); }}
-                className={`px-2.5 py-2 rounded-full text-xs font-bold uppercase tracking-wider border flex items-center gap-1.5 transition-all cursor-pointer backdrop-blur-xl ${
-                  gyroscopeActive 
-                    ? 'bg-emerald-600/80 border-emerald-400 text-white' 
-                    : 'bg-white/10 hover:bg-white/20 border-white/15 text-white'
-                }`}
-                title="Ativar Giroscópio / Sensor de Movimento"
-              >
-                <Smartphone size={16} className={gyroscopeActive ? 'text-white' : 'text-[#00A3E0]'} />
-                <span className="hidden md:inline">{gyroscopeActive ? 'Giroscópio Ativo' : 'Giroscópio'}</span>
-              </button>
-            )}
-
-            {/* VR Mode Toggle Button (Stereoscopic Split-Screen) */}
+            {/* VR Mode Toggle Button (Stereoscopic Split-Screen for Headsets) */}
             <button 
               onClick={toggleVrMode} 
               className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-full text-xs font-black uppercase tracking-wider border flex items-center gap-2 transition-all cursor-pointer backdrop-blur-xl shadow-lg ${
@@ -672,17 +622,6 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
                 {isVrMode ? 'Sair VR' : 'VR'}
               </span>
             </button>
-
-            {/* Open in YouTube VR App button */}
-            {is360Content && (
-              <button 
-                onClick={(e) => { e.stopPropagation(); openNativeYouTubeVR(); }}
-                className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full text-white border border-white/10 cursor-pointer transition-colors"
-                title="Abrir no YouTube VR / App Nativo"
-              >
-                <ExternalLink size={17} />
-              </button>
-            )}
 
             {/* Settings Button */}
             <button 
@@ -774,99 +713,6 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
           </div>
         </div>
       </div>
-
-      {/* VR Interactive Guide Modal */}
-      {showVrGuide && (
-        <div 
-          onClick={() => setShowVrGuide(false)}
-          className="fixed inset-0 z-[400] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-xl bg-[#0A1626] border border-white/15 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative"
-          >
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#0072BC]/20 border border-[#00A3E0]/30 flex items-center justify-center text-[#00A3E0]">
-                  <Glasses size={18} />
-                </div>
-                <div>
-                  <h3 className="text-sm sm:text-base font-bold text-white uppercase tracking-wider">
-                    Como Assistir em Realidade Virtual 360°
-                  </h3>
-                  <p className="text-[11px] text-gray-400">Guia de Experiência Imersiva no PARAVERSO</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setShowVrGuide(false)}
-                className="p-2 text-gray-400 hover:text-white rounded-full hover:bg-white/10 transition-colors cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Option 1: Desktop */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#0072BC]/20 flex items-center justify-center text-[#00A3E0]">
-                  <Compass size={18} />
-                </div>
-                <h4 className="text-xs font-bold text-white uppercase">1. No Computador</h4>
-                <p className="text-[11px] text-gray-300 leading-relaxed">
-                  Clique com o mouse sobre o vídeo e arraste em qualquer direção. Você também pode usar as teclas <strong className="text-white">W, A, S, D</strong> para navegar 360°.
-                </p>
-              </div>
-
-              {/* Option 2: Mobile Gyro */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                  <Smartphone size={18} />
-                </div>
-                <h4 className="text-xs font-bold text-white uppercase">2. No Celular</h4>
-                <p className="text-[11px] text-gray-300 leading-relaxed">
-                  Coloque em tela cheia e mova o celular ao redor. O giroscópio acompanha os movimentos da sua cabeça pelo espaço.
-                </p>
-              </div>
-
-              {/* Option 3: VR Headset */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#DE292E]/20 flex items-center justify-center text-[#DE292E]">
-                  <Glasses size={18} />
-                </div>
-                <h4 className="text-xs font-bold text-white uppercase">3. Óculos VR</h4>
-                <p className="text-[11px] text-gray-300 leading-relaxed">
-                  Ative o botão <strong className="text-[#DE292E]">Modo Óculos VR</strong> para visão estereoscópica dividida em duas lentes (Google Cardboard / VR Box).
-                </p>
-              </div>
-            </div>
-
-            {/* VR Actions */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
-              <button
-                onClick={() => {
-                  setShowVrGuide(false);
-                  toggleVrMode();
-                }}
-                className="w-full sm:w-1/2 py-3 bg-[#DE292E] hover:bg-[#C8191E] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#DE292E]/25"
-              >
-                <Glasses size={16} />
-                <span>Iniciar Modo Óculos VR</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setShowVrGuide(false);
-                  openNativeYouTubeVR();
-                }}
-                className="w-full sm:w-1/2 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer border border-white/15"
-              >
-                <ExternalLink size={16} />
-                <span>Abrir no App YouTube VR</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Settings Drawer */}
       <div className={`absolute inset-0 z-[300] bg-black/50 backdrop-blur-sm transition-all duration-300 flex items-center justify-end ${showSettings ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>

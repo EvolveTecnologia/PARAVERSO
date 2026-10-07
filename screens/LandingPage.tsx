@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Sparkles, Shield, Cpu, Zap, Award, Globe, Users, ChevronDown, ArrowRight, CheckCircle, Smartphone, Monitor, Tv, Briefcase, GraduationCap, Leaf, Utensils, HelpCircle, Landmark, PartyPopper, Film } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Play, Sparkles, Shield, Cpu, Zap, Award, Globe, Users, ChevronDown, ArrowRight, CheckCircle, Smartphone, Monitor, Tv, Briefcase, GraduationCap, Leaf, Utensils, HelpCircle, Landmark, PartyPopper, Film, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { COURSES } from '../constants';
 import { Category } from '../types';
@@ -31,6 +31,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const sliderIntervalRef = useRef<number | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const isDragging = useRef<boolean>(false);
   const { t } = useLanguage();
 
   // Scroll to top whenever currentView changes
@@ -88,12 +91,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
   }, []);
 
   // --- SLIDER LOGIC ---
-  const startSlider = () => {
+  const startSlider = useCallback(() => {
     if (sliderIntervalRef.current) clearInterval(sliderIntervalRef.current);
     sliderIntervalRef.current = window.setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % slides.length);
     }, 6000);
-  };
+  }, [slides.length]);
 
   useEffect(() => {
     if (currentView === 'home') {
@@ -102,11 +105,67 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
     return () => {
       if (sliderIntervalRef.current) clearInterval(sliderIntervalRef.current);
     };
-  }, [currentView]);
+  }, [currentView, startSlider]);
 
   const handleManualSlide = (index: number) => {
     setCurrentSlide(index);
     startSlider(); 
+  };
+
+  const handleNextSlide = () => {
+    setCurrentSlide(prev => (prev + 1) % slides.length);
+    startSlider();
+  };
+
+  const handlePrevSlide = () => {
+    setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
+    startSlider();
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    isDragging.current = true;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!isDragging.current || touchStartX.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchStartX.current - touchEndX;
+    const diffY = touchStartY.current !== null ? touchStartY.current - touchEndY : 0;
+
+    if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 0) {
+        handleNextSlide();
+      } else {
+        handlePrevSlide();
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isDragging.current = false;
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    touchStartX.current = e.clientX;
+    touchStartY.current = e.clientY;
+    isDragging.current = true;
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isDragging.current || touchStartX.current === null) return;
+    const diffX = touchStartX.current - e.clientX;
+    if (Math.abs(diffX) > 40) {
+      if (diffX > 0) {
+        handleNextSlide();
+      } else {
+        handlePrevSlide();
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isDragging.current = false;
   };
 
   // --- ROUTING LOGIC ---
@@ -145,7 +204,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
       </nav>
 
       {/* --- HERO SECTION --- */}
-      <section className="relative h-[85vh] w-full overflow-hidden group">
+      <section 
+        className="relative h-[85vh] w-full overflow-hidden group select-none touch-pan-y cursor-grab active:cursor-grabbing"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+      >
         {slides.map((slide, index) => (
           <div 
             key={slide.id}
@@ -154,29 +219,29 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
             <img 
               src={slide.image} 
               alt={slide.title} 
-              className="w-full h-full object-cover animate-ken-burns" 
+              className="w-full h-full object-cover animate-ken-burns pointer-events-auto" 
               referrerPolicy="no-referrer"
               onError={(e) => {
                 e.currentTarget.src = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop';
               }}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0A1626] via-[#0A1626]/75 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0A1626] via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0A1626] via-[#0A1626]/75 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0A1626] via-transparent to-transparent pointer-events-none" />
             
-            <div className="absolute top-0 left-0 h-full flex flex-col justify-center px-5 sm:px-8 md:px-14 max-w-2xl pt-16 md:pt-12">
-              <div className="inline-flex items-center gap-2 mb-2 animate-in slide-in-from-left-4 fade-in duration-700 delay-100">
+            <div className="absolute top-0 left-0 h-full flex flex-col justify-center px-5 sm:px-8 md:px-14 max-w-2xl pt-16 md:pt-12 pointer-events-none">
+              <div className="inline-flex items-center gap-2 mb-2 animate-in slide-in-from-left-4 fade-in duration-700 delay-100 pointer-events-auto">
                 <span className="w-2 h-2 rounded-full bg-[#DE292E] animate-pulse" />
                 <span className="text-[#00A3E0] font-bold tracking-widest uppercase text-[10px] md:text-xs">
                   {slide.category}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black uppercase leading-tight mb-3 drop-shadow-xl animate-in slide-in-from-left-4 fade-in duration-700 delay-200 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black uppercase leading-tight mb-3 drop-shadow-xl animate-in slide-in-from-left-4 fade-in duration-700 delay-200 tracking-tight pointer-events-auto">
                 {slide.title}
               </h1>
-              <p className="text-gray-200 text-xs md:text-sm lg:text-base mb-6 leading-relaxed line-clamp-3 md:line-clamp-none animate-in slide-in-from-left-4 fade-in duration-700 delay-300 max-w-xl">
+              <p className="text-gray-200 text-xs md:text-sm lg:text-base mb-6 leading-relaxed line-clamp-3 md:line-clamp-none animate-in slide-in-from-left-4 fade-in duration-700 delay-300 max-w-xl pointer-events-auto">
                 {slide.description}
               </p>
-              <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 animate-in slide-in-from-bottom-4 fade-in duration-700 delay-500">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 animate-in slide-in-from-bottom-4 fade-in duration-700 delay-500 pointer-events-auto">
                 <button 
                   onClick={onEnter}
                   className="bg-[#DE292E] hover:bg-[#C8191E] text-white px-5 sm:px-6 py-3 rounded-xl font-extrabold uppercase tracking-wider text-xs transition-all transform hover:scale-[1.03] active:scale-95 shadow-lg shadow-[#DE292E]/30 cursor-pointer w-full sm:w-auto text-center"
@@ -193,6 +258,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
             </div>
           </div>
         ))}
+
+        {/* Navigation Chevrons */}
+        <button 
+          onClick={(e) => { e.stopPropagation(); handlePrevSlide(); }}
+          className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/40 hover:bg-black/75 text-white items-center justify-center backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 transition-all cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+          aria-label="Slide anterior"
+        >
+          <ChevronLeft size={22} />
+        </button>
+
+        <button 
+          onClick={(e) => { e.stopPropagation(); handleNextSlide(); }}
+          className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/40 hover:bg-black/75 text-white items-center justify-center backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 transition-all cursor-pointer shadow-xl hover:scale-110 active:scale-95"
+          aria-label="Próximo slide"
+        >
+          <ChevronRight size={22} />
+        </button>
         
         {/* Indicators */}
         <div className="absolute bottom-20 right-6 md:right-16 z-20 flex gap-3">
@@ -238,7 +320,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
               Ver Acervo Completo →
             </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {techCourses.map(course => (
               <div key={course.id} onClick={onEnter} className="cursor-pointer transform hover:scale-[1.02] transition-all">
                 <CourseCard course={course} onClick={onEnter} />
@@ -257,7 +339,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
               Ver Acervo Completo →
             </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {patrimonialCourses.map(course => (
               <div key={course.id} onClick={onEnter} className="cursor-pointer transform hover:scale-[1.02] transition-all">
                 <CourseCard course={course} onClick={onEnter} />
