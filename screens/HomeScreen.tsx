@@ -182,10 +182,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCourseClick, onCategoryClick,
           </button>
         </div>
         <div className="relative">
-          {/* Mobile & Tablet Card Row with Vertical Poster Aspect Model */}
-          <div className={`flex gap-3 sm:gap-4 md:gap-5 overflow-x-auto hide-scrollbar py-2 ${CONTENT_PADDING} scroll-smooth items-start`}>
+          {/* Card Row: Retrato em Mobile/Tablet, Paisagem em Desktop */}
+          <div className={`flex gap-3 sm:gap-4 md:gap-5 lg:gap-5 overflow-x-auto hide-scrollbar py-2 ${CONTENT_PADDING} scroll-smooth items-start`}>
             {courses.map(course => (
-              <div key={course.id} className="w-32 sm:w-40 md:w-48 lg:w-56 flex-shrink-0">
+              <div key={course.id} className="w-32 sm:w-40 md:w-48 lg:w-72 xl:w-80 flex-shrink-0">
                 <CourseCard course={course} onClick={onCourseClick} />
               </div>
             ))}
