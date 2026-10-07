@@ -63,15 +63,15 @@ const PATRIMONIAL_COURSES: Course[] = [
       { 
         title: 'Módulo 1 : História e Território no Tapajós', 
         lessons: [
-          { id: 'mun-1', title: 'Origens, Mitologia e Território Ancestral', duration: '18 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=BffHzt-XnWc' },
-          { id: 'mun-2', title: 'Língua Munduruku e Tradição Oral', duration: '15 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=IvhYpvklKx8' }
+          { id: 'mun-1', title: 'Origens, Mitologia e Território Ancestral', duration: '18 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=PQdZ_3_r8nA' },
+          { id: 'mun-2', title: 'Língua Munduruku e Tradição Oral', duration: '15 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=PQdZ_3_r8nA' }
         ] 
       },
       { 
         title: 'Módulo 2 : Arte Plumária e Cosmologia', 
         lessons: [
-          { id: 'mun-3', title: 'Tecelagem, Grafismos e Cerâmica Tradicional', duration: '20 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=S3vskTw_vqE' },
-          { id: 'mun-4', title: 'Sustentabilidade e Soberania Alimentar', duration: '22 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=I_Wcj3ISIUM' }
+          { id: 'mun-3', title: 'Tecelagem, Grafismos e Cerâmica Tradicional', duration: '20 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=PQdZ_3_r8nA' },
+          { id: 'mun-4', title: 'Sustentabilidade e Soberania Alimentar', duration: '22 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=PQdZ_3_r8nA' }
         ] 
       }
     ]
@@ -202,7 +202,7 @@ const PATRIMONIAL_COURSES: Course[] = [
 const EVENTOS_CULTURAIS_COURSES: Course[] = [
   {
     id: 'festival-de-carimbo',
-    title: 'Festival de Carimbó',
+    title: 'Festival de Carimbó de Marapanim',
     category: Category.Eventos,
     description: 'Sinta o calor dos tambores de curimbó, a ginga das saias rodadas e a celebração dos mestres da cultura popular em Marapanim e nas praias do litoral paraense.',
     instructor: 'Associação dos Mestres de Carimbó • SECULT-PA',
@@ -218,21 +218,21 @@ const EVENTOS_CULTURAIS_COURSES: Course[] = [
       { 
         title: 'Módulo 1 : As Raízes do Ritmo', 
         lessons: [
-          { id: 'car-1', title: 'Confecção dos Tambores e Instrumentos Tradicionais', duration: '15 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=Go4K2QwKWIk' },
-          { id: 'car-2', title: 'Mestre Verequete e os Baluartes do Carimbó', duration: '22 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=3qRrVvMntok' }
+          { id: 'car-1', title: 'Confecção dos Tambores e Instrumentos Tradicionais', duration: '15 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=Ri0ihgVlsnM' },
+          { id: 'car-2', title: 'Mestre Verequete e os Baluartes do Carimbó', duration: '22 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=Ri0ihgVlsnM' }
         ] 
       },
       { 
         title: 'Módulo 2 : A Grande Roda em 360°', 
         lessons: [
-          { id: 'car-3', title: 'Show ao Vivo no Festival de Marapanim em VR 360°', duration: '25 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=7LG4D_USSrU' }
+          { id: 'car-3', title: 'Show ao Vivo no Festival de Marapanim em VR 360°', duration: '25 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=Ri0ihgVlsnM' }
         ] 
       }
     ]
   },
   {
     id: 'pararraia-2026',
-    title: 'Parárraiá',
+    title: 'Parárraiá - O São João da Amazônia',
     category: Category.Eventos,
     description: 'O Maior São João da Amazônia! Acompanhe as apresentações das quadrilhas juninas, shows com artistas de tecnobrega, forró paraense e gastronomia típica junina.',
     instructor: 'Comissão Organizadora do Parárraiá • Governo do Pará',
@@ -248,8 +248,8 @@ const EVENTOS_CULTURAIS_COURSES: Course[] = [
       { 
         title: 'Módulo 1 : As Quadrilhas Juninas Campeãs', 
         lessons: [
-          { id: 'par-1', title: 'Espetáculo de Cores, Coreografias e Tradição', duration: '28 min', completed: false, videoUrl: GENERIC_VIDEO },
-          { id: 'par-2', title: 'Culinária de São João: Mingau de Milho, Vatapá e Maniçoba', duration: '18 min', completed: false, videoUrl: GENERIC_VIDEO }
+          { id: 'par-1', title: 'Espetáculo de Cores, Coreografias e Tradição', duration: '28 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=J-oRo4lIAnc' },
+          { id: 'par-2', title: 'Culinária de São João: Mingau de Milho, Vatapá e Maniçoba', duration: '18 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=J-oRo4lIAnc' }
         ] 
       }
     ]
@@ -309,7 +309,7 @@ const EVENTOS_CULTURAIS_COURSES: Course[] = [
   },
   {
     id: 'cirio-de-nazare',
-    title: 'Círio de Nazaré: Fé, Procissões e Tradição',
+    title: 'Círio de Nazaré - Fé & Identidade',
     category: Category.Eventos,
     description: 'A maior procissão religiosa do planeta: a corda, o manto sagrado, a trasladação fluvial e a união de mais de 2 milhões de romeiros nas ruas de Belém do Pará em registros 360° imersivos.',
     instructor: 'Diretoria da Festa de Nazaré & Curadoria SECULT-PA',
@@ -325,14 +325,14 @@ const EVENTOS_CULTURAIS_COURSES: Course[] = [
       { 
         title: 'Módulo 1 : A História e os Símbolos da Fé', 
         lessons: [
-          { id: 'cir-1', title: 'O Achado de Plácido e a Construção da Basílica', duration: '18 min', completed: false, videoUrl: GENERIC_VIDEO },
-          { id: 'cir-2', title: 'A Corda dos Romeiros e os Mantos da Virgem', duration: '22 min', completed: false, videoUrl: GENERIC_VIDEO }
+          { id: 'cir-1', title: 'O Achado de Plácido e a Construção da Basílica', duration: '18 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=pIAg-HamCUM' },
+          { id: 'cir-2', title: 'A Corda dos Romeiros e os Mantos da Virgem', duration: '22 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=pIAg-HamCUM' }
         ] 
       },
       { 
         title: 'Módulo 2 : A Grande Romaria em VR 360°', 
         lessons: [
-          { id: 'cir-3', title: 'A Trasladação Noturna e a Manhã de Domingo do Círio', duration: '30 min', completed: false, videoUrl: GENERIC_VIDEO }
+          { id: 'cir-3', title: 'A Trasladação Noturna e a Manhã de Domingo do Círio', duration: '30 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=pIAg-HamCUM' }
         ] 
       }
     ]
@@ -503,8 +503,8 @@ const MEIO_AMBIENTE_COURSES: Course[] = [
       { 
         title: 'Módulo 1 : As Bacias Hidrográficas do Pará', 
         lessons: [
-          { id: 'amz-1', title: 'O Rio Amazonas, Tapajós, Xingu e Tocantins', duration: '20 min', completed: false, videoUrl: GENERIC_VIDEO },
-          { id: 'amz-2', title: 'Florestas de Várzea e Terra Firme', duration: '25 min', completed: false, videoUrl: GENERIC_VIDEO }
+          { id: 'amz-1', title: 'O Rio Amazonas, Tapajós, Xingu e Tocantins', duration: '20 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=0dkQxRADDH4' },
+          { id: 'amz-2', title: 'Florestas de Várzea e Terra Firme', duration: '25 min', completed: false, videoUrl: 'https://www.youtube.com/watch?v=0dkQxRADDH4' }
         ] 
       }
     ]

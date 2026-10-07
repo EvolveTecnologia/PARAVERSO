@@ -1,23 +1,44 @@
-<?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
- "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
-<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
- width="620.000000pt" height="140.000000pt" viewBox="0 0 620.000000 140.000000"
- preserveAspectRatio="xMidYMid meet">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 140" width="620" height="140">
+  <defs>
+    <linearGradient id="whiteGlowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="50%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#00E676" />
+    </linearGradient>
+    <linearGradient id="redAccentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF5252" />
+      <stop offset="100%" stop-color="#DE292E" />
+    </linearGradient>
+    <filter id="whiteGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
 
-<g transform="translate(0.000000,140.000000) scale(0.100000,-0.100000)"
-fill="#000000" stroke="none">
-<path d="M444 1351 c-23 -10 -54 -36 -70 -57 l-29 -37 -3 -541 c-1 -298 0
--551 3 -563 7 -30 61 -90 96 -109 23 -12 116 -14 565 -14 l537 0 43 25 c23 14
-53 42 66 62 l23 38 3 518 c2 347 -1 531 -8 557 -13 49 -63 108 -107 126 -26
-11 -138 14 -555 14 -489 0 -526 -2 -564 -19z m439 -345 c62 -31 91 -85 96
--177 4 -102 -20 -157 -86 -196 -41 -23 -59 -27 -157 -31 -61 -2 -116 -8 -122
--13 -6 -5 -14 -48 -16 -95 -5 -98 -22 -125 -79 -127 l-34 -2 0 127 c0 112 2
-130 21 155 36 49 77 63 191 63 56 0 113 5 126 11 46 21 62 101 32 159 -9 17
--17 31 -18 32 -1 1 -81 4 -177 7 l-175 6 2 30 c1 18 13 39 29 53 26 23 32 23
-178 20 124 -2 158 -6 189 -22z m243 -168 c12 -13 47 -93 79 -183 32 -88 61
--166 65 -174 8 -15 11 -8 85 204 25 71 55 139 66 152 20 20 94 41 106 30 3 -4
--36 -119 -88 -256 l-93 -251 -39 0 c-59 0 -103 25 -126 73 -26 53 -161 414
--161 429 0 19 81 1 106 -24z"/>
-</g>
+  <!-- Left Icon: Futuristic PARAVERSO Portal / VR Emblem -->
+  <g transform="translate(20, 15)">
+    <!-- Outer Glowing Ring -->
+    <path d="M 55,5 A 50,50 0 0 1 105,55 L 90,55 A 35,35 0 0 0 55,20 Z" fill="#00D2FF" />
+    <path d="M 55,5 A 50,50 0 0 0 5,55 L 20,55 A 35,35 0 0 1 55,20 Z" fill="#00E676" />
+    <path d="M 5,55 A 50,50 0 0 0 55,105 L 55,90 A 35,35 0 0 1 20,55 Z" fill="url(#redAccentGrad)" />
+    <path d="M 105,55 A 50,50 0 0 1 55,105 L 55,90 A 35,35 0 0 0 90,55 Z" fill="#38BDF8" />
+
+    <!-- Center Futuristic Hexagon / VR Prism -->
+    <polygon points="55,28 78,41 78,69 55,82 32,69 32,41" fill="#0A1626" stroke="#38BDF8" stroke-width="3" />
+
+    <!-- Center Star of Pará -->
+    <polygon points="55,38 59,49 71,49 61,56 65,68 55,60 45,68 49,56 39,49 51,49" fill="#00E5FF" filter="url(#whiteGlow)" />
+    <polygon points="55,41 58,49 67,49 60,54 63,63 55,57 47,63 50,54 43,49 52,49" fill="#FFFFFF" />
+  </g>
+
+  <!-- Right Typography: PARAVERSO Wordmark -->
+  <g transform="translate(145, 20)">
+    <text x="0" y="65" font-family="'Plus Jakarta Sans', 'Inter', 'Montserrat', -apple-system, sans-serif" font-size="58" font-weight="900" fill="#FFFFFF" letter-spacing="4">PARAVERSO</text>
+    
+    <!-- Accent Line under wordmark -->
+    <rect x="2" y="80" width="360" height="4" rx="2" fill="url(#whiteGlowGrad)" />
+    <rect x="366" y="80" width="45" height="4" rx="2" fill="url(#redAccentGrad)" />
+    
+    <text x="2" y="100" font-family="'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif" font-size="13" font-weight="700" fill="#94A3B8" letter-spacing="3.5">GOVERNO DO PARÁ • SECULT</text>
+  </g>
 </svg>

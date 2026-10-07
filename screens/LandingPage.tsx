@@ -60,6 +60,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
       title: 'PATRIMONIAL & SABERES AMAZÔNICOS',
       description: 'Conheça o Povo Munduruku, o Arquipélago do Marajó, Santarém e os Jogos Indígenas: a rica cosmologia dos povos da floresta.',
       category: 'Amazônia Viva'
+    },
+    {
+      id: 4,
+      image: 'https://i.ytimg.com/vi/J2RWKouu7fs/maxresdefault.jpg',
+      title: 'A FLORESTA AMAZÔNICA EM REALIDADE VIRTUAL 360º',
+      description: 'Sobrevoe as copas das árvores centenárias e navegue pelos igarapés intocados nas Unidades de Conservação do Estado do Pará.',
+      category: 'Meio Ambiente & VR 360°'
     }
   ];
 

@@ -1,212 +1,107 @@
 import React, { useState } from 'react';
 import { 
-  CreditCard, ShieldCheck, HelpCircle, 
-  LogOut, Settings, Award, ChevronLeft, 
-  ChevronRight, ExternalLink, Download, Smartphone 
+  User, ShieldCheck, HelpCircle, 
+  LogOut, Settings, ChevronLeft, 
+  ChevronRight, Sparkles
 } from 'lucide-react';
-import { UserProfile, Certificate } from '../types';
+import { UserProfile } from '../types';
 
 import AccountScreen from './profile/AccountScreen';
 import LegalScreen from './profile/LegalScreen';
 import SupportScreen from './profile/SupportScreen';
 import SettingsScreen from './profile/SettingsScreen';
-import { CertificateViewerModal } from '../components/CertificateViewerModal';
-import { PWAInstallModal } from '../components/PWAInstallModal';
-import { usePWAInstall } from '../components/usePWAInstall';
 
-type SubViewType = 'account' | 'certs' | 'privacy' | 'support' | 'settings' | null;
+type SubViewType = 'account' | 'privacy' | 'support' | 'settings';
 
 interface ProfileScreenProps {
   onLogout: () => void;
 }
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout }) => {
-  const [activeSubView, setActiveSubView] = useState<SubViewType>(null);
+  const [activeSubView, setActiveSubView] = useState<SubViewType>('account');
+  const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [selectedCert, setSelectedCert] = useState<Certificate | null>(null);
-  const [showInstallModal, setShowInstallModal] = useState(false);
-
-  const {
-    isInstallable,
-    isInstalled,
-    isIOS,
-    isAndroid,
-    install,
-  } = usePWAInstall();
   
   const [user, setUser] = useState<UserProfile>({
     name: 'Placide Baundja Ikuba',
     email: 'cidadao@paraverso.pa.gov.br',
-    cpf: 'PA-BEL-89241',
+    cpf: '042.891.242-10',
     avatar: '/perfil.jpg',
     level: 12,
-    badges: ['Certificado', 'Pioneiro Cultural'],
+    badges: ['Pioneiro Cultural', 'Cidadão Pará'],
     plan: 'Acesso Público Oficial • SECULT-PA'
   });
 
-  const certificates: Certificate[] = [
-    { id: '1', title: 'Certificado em História & Patrimônio do Pará', date: '14/01/2026' },
-    { id: '2', title: 'Fundamentos de Realidade Virtual & Cultura Amazônica', date: '20/12/2025' },
-    { id: '3', title: 'Gestão Cultural & Economia Criativa no Pará', date: '15/11/2025' }
-  ];
-
   const menuItems = [
-    { id: 'account', label: 'Minha Conta', icon: CreditCard, subtitle: 'Dados pessoais e credenciais' },
-    { id: 'certs', label: 'Meus Certificados', icon: Award, subtitle: 'Certificados digitais oficiais SECULT-PA' },
-    { id: 'privacy', label: 'Termos & Privacidade', icon: ShieldCheck, subtitle: 'Conformidade e segurança de dados' },
-    { id: 'support', label: 'Suporte & Ajuda', icon: HelpCircle, subtitle: 'Atendimento e ouvidoria' },
-    { id: 'settings', label: 'Configurações', icon: Settings, subtitle: 'Streaming, idiomas e preferências' },
+    { 
+      id: 'account' as SubViewType, 
+      label: 'Minha Conta', 
+      icon: User, 
+      subtitle: 'Dados cadastrais, contatos e endereço no Pará' 
+    },
+    { 
+      id: 'privacy' as SubViewType, 
+      label: 'Termos e Privacidade', 
+      icon: ShieldCheck, 
+      subtitle: 'Termos de uso, licenças e conformidade LGPD' 
+    },
+    { 
+      id: 'support' as SubViewType, 
+      label: 'Suporte e Ajuda', 
+      icon: HelpCircle, 
+      subtitle: 'Atendimento ao cidadão, chat e ouvidoria SECULT' 
+    },
+    { 
+      id: 'settings' as SubViewType, 
+      label: 'Configurações', 
+      icon: Settings, 
+      subtitle: 'Streaming, economia de dados e preferências' 
+    },
   ];
 
-  const renderContent = () => {
-    if (!activeSubView && typeof window !== 'undefined' && window.innerWidth >= 768) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 p-10 select-none">
-          <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mb-5 border border-white/10">
-            <Settings size={36} className="text-[#00A3E0]" />
-          </div>
-          <h3 className="text-lg font-bold text-white mb-2">Painel do Usuário PARAVERSO</h3>
-          <p className="max-w-xs text-xs text-gray-400 leading-relaxed">
-            Selecione uma opção no menu lateral para gerenciar suas preferências e certificados.
-          </p>
-        </div>
-      );
-    }
+  const handleSelectMenuItem = (id: SubViewType) => {
+    setActiveSubView(id);
+    setIsMobileDetailOpen(true);
+  };
 
+  const renderActiveScreen = () => {
     switch (activeSubView) {
       case 'account':
-        return (
-          <div className="pb-28 sm:pb-32 hide-scrollbar">
-            <AccountScreen user={user} onUpdate={setUser} />
-          </div>
-        );
+        return <AccountScreen user={user} onUpdate={setUser} />;
       case 'privacy':
-        return (
-          <div className="pb-28 sm:pb-32 hide-scrollbar">
-            <LegalScreen />
-          </div>
-        );
+        return <LegalScreen />;
       case 'support':
-        return (
-          <div className="pb-28 sm:pb-32 hide-scrollbar">
-            <SupportScreen />
-          </div>
-        );
+        return <SupportScreen />;
       case 'settings':
-        return (
-          <div className="pb-28 sm:pb-32 hide-scrollbar">
-            <SettingsScreen />
-          </div>
-        );
-      case 'certs':
-        return (
-          <div className="p-4 sm:p-6 md:p-10 space-y-6 animate-in fade-in duration-300 pb-36 md:pb-24 hide-scrollbar">
-            <div className="space-y-1">
-              <h2 className="text-lg sm:text-xl font-bold uppercase tracking-tight text-white">
-                Meus Certificados Digitais
-              </h2>
-              <p className="text-gray-300 text-xs leading-relaxed max-w-2xl">
-                Consulte e baixe seus certificados emitidos pelo PARAVERSO em parceria com a Secretaria de Estado de Cultura do Pará (SECULT-PA).
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 gap-4 pt-1">
-              {certificates.map((cert) => (
-                <div 
-                  key={cert.id} 
-                  className="bg-[#132238] border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:border-[#0072BC] transition-all shadow-md"
-                >
-                  <div className="flex items-center gap-3.5 w-full md:w-auto">
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-[#0072BC] to-[#00A3E0] text-white rounded-xl flex items-center justify-center shadow-lg shrink-0">
-                      <Award size={22} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-white text-xs sm:text-sm leading-snug truncate sm:whitespace-normal">
-                        {cert.title}
-                      </h3>
-                      <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-1">
-                        Emitido em: {cert.date}
-                      </p>
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={() => setSelectedCert(cert)}
-                    className="w-full md:w-auto px-4 sm:px-5 py-2.5 bg-white/5 hover:bg-[#0072BC] border border-white/10 rounded-xl text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
-                  >
-                    <ExternalLink size={14} className="text-[#00A3E0]" />
-                    Visualizar Certificado
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <div className="p-4 rounded-2xl bg-[#0072BC]/15 border border-[#0072BC]/30 flex items-center gap-3 text-xs text-gray-300">
-              <ShieldCheck size={20} className="text-[#00A3E0] shrink-0" />
-              <span>
-                Todos os certificados possuem autenticação digital oficial e registro válido perante a SECULT-PA.
-              </span>
-            </div>
-          </div>
-        );
+        return <SettingsScreen />;
       default:
-        return null;
+        return <AccountScreen user={user} onUpdate={setUser} />;
     }
   };
 
-  const MobileHeader = ({ title, onBack }: { title: string, onBack: () => void }) => (
-    <div className="px-4 sm:px-6 py-4 border-b border-white/10 flex items-center gap-4 bg-[#0A1626] sticky top-0 z-50 md:hidden shadow-md">
-      <button 
-        onClick={onBack} 
-        className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors cursor-pointer text-white"
-        aria-label="Voltar"
-      >
-        <ChevronLeft size={20} />
-      </button>
-      <h2 className="text-xs sm:text-sm font-black text-white uppercase tracking-wider truncate">
-        {title}
-      </h2>
-    </div>
-  );
-
-  if (activeSubView) {
-    const currentItem = menuItems.find(i => i.id === activeSubView);
-    return (
-      <>
-        <div className="md:hidden fixed inset-0 bg-[#0A1626] z-[60] flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
-          <MobileHeader title={currentItem?.label || ''} onBack={() => setActiveSubView(null)} />
-          <div className="flex-1 overflow-y-auto hide-scrollbar overscroll-contain">
-            {renderContent()}
-          </div>
-        </div>
-
-        <CertificateViewerModal 
-          certificate={selectedCert}
-          userName={user.name}
-          onClose={() => setSelectedCert(null)}
-        />
-      </>
-    );
-  }
+  const currentItem = menuItems.find(i => i.id === activeSubView) || menuItems[0];
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-[#0A1626] overflow-hidden text-white">
+    <div className="flex flex-col md:flex-row h-screen bg-[#0A1626] text-white overflow-hidden">
       
-      {/* Sidebar Navigation */}
-      <div className="w-full md:w-1/3 lg:w-1/4 md:border-r border-white/10 overflow-y-auto h-full bg-[#0A1626] relative z-10 hide-scrollbar overscroll-contain">
+      {/* Sidebar / Main Menu (visible on desktop always, visible on mobile when detail is closed) */}
+      <div className={`w-full md:w-1/3 lg:w-80 md:border-r border-white/10 flex flex-col h-full bg-[#0A1626] relative z-10 ${isMobileDetailOpen ? 'hidden md:flex' : 'flex'}`}>
         
         {/* Profile Header */}
-        <div className="pt-20 sm:pt-24 pb-6 px-6 text-center bg-gradient-to-b from-[#132238] to-[#0A1626] border-b border-white/5">
+        <div className="pt-20 sm:pt-24 pb-6 px-6 text-center bg-gradient-to-b from-[#132238] to-[#0A1626] border-b border-white/5 shrink-0">
           <div className="relative inline-block mb-3">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-[#0072BC] shadow-xl mx-auto flex items-center justify-center bg-[#132238]">
               <img 
                 src={user.avatar} 
                 className="w-full h-full rounded-full object-cover object-center aspect-square" 
-                alt="Avatar"
+                alt="Avatar do Usuário"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=face';
+                }}
               />
             </div>
-            <div className="absolute bottom-0 right-0 bg-[#DE292E] p-1.5 rounded-full text-white shadow-md">
-              <Award size={13} />
+            <div className="absolute bottom-0 right-0 bg-[#0072BC] p-1.5 rounded-full text-white shadow-md border-2 border-[#0A1626]">
+              <Sparkles size={13} className="text-[#00A3E0]" />
             </div>
           </div>
           <h1 className="text-base sm:text-lg font-bold tracking-tight text-white mb-0.5 uppercase truncate">
@@ -217,29 +112,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout }) => {
           </p>
         </div>
 
-        {/* Navigation Items */}
-        <div className="px-4 py-4 space-y-2 pb-36 md:pb-24">
-          {!isInstalled && (
-            <button
-              onClick={() => setShowInstallModal(true)}
-              className="w-full flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-[#DE292E]/20 to-[#0072BC]/20 border border-[#DE292E]/40 text-left hover:border-[#DE292E] transition-all cursor-pointer shadow-md mb-3"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-[#DE292E] text-white">
-                  <Smartphone size={16} />
-                </div>
-                <div>
-                  <span className="block text-xs font-black uppercase tracking-wider text-white">
-                    Instalar Aplicativo
-                  </span>
-                  <span className="text-[10px] text-[#DE292E] font-semibold">
-                    Android &amp; iOS PWA
-                  </span>
-                </div>
-              </div>
-              <Download size={15} className="text-[#DE292E] animate-bounce" />
-            </button>
-          )}
+        {/* Menu Navigation */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 pb-32 md:pb-8 hide-scrollbar">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-3 py-1">
+            Menu do Perfil
+          </div>
 
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -247,65 +124,91 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout }) => {
             return (
               <button 
                 key={item.id} 
-                onClick={() => setActiveSubView(item.id as SubViewType)}
+                onClick={() => handleSelectMenuItem(item.id)}
                 className={`w-full flex items-center justify-between p-3.5 rounded-2xl transition-all border group text-left cursor-pointer ${
                   isActive 
-                    ? 'bg-[#0072BC] border-[#00A3E0] shadow-lg' 
-                    : 'bg-[#132238]/60 border-white/5 hover:bg-[#132238] hover:border-white/10'
+                    ? 'bg-[#0072BC] border-[#00A3E0] shadow-lg shadow-[#0072BC]/20 text-white' 
+                    : 'bg-[#132238]/60 border-white/5 hover:bg-[#132238] hover:border-white/10 text-gray-200'
                 }`}
               >
-                <div className="flex items-center gap-3.5">
-                  <div className={`p-2 rounded-xl transition-colors ${isActive ? 'bg-white/20 text-white' : 'bg-white/5 text-gray-400 group-hover:text-white'}`}>
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className={`p-2.5 rounded-xl transition-colors shrink-0 ${isActive ? 'bg-white/20 text-white' : 'bg-white/5 text-gray-400 group-hover:text-white'}`}>
                     <Icon size={18} />
                   </div>
-                  <div>
-                    <span className="block text-xs font-bold tracking-wide text-white">
+                  <div className="min-w-0 flex-1">
+                    <span className="block text-xs font-bold tracking-wide truncate">
                       {item.label}
                     </span>
-                    <span className={`text-[10px] hidden md:block ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
+                    <span className={`text-[10px] block truncate ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
                       {item.subtitle}
                     </span>
                   </div>
                 </div>
-                <ChevronRight size={14} className={isActive ? 'text-white' : 'text-gray-500'} />
+                <ChevronRight size={14} className={`shrink-0 ml-2 ${isActive ? 'text-white' : 'text-gray-500'}`} />
               </button>
             );
           })}
 
+          <div className="pt-4 border-t border-white/5">
+            <button 
+              onClick={() => setShowLogoutConfirm(true)}
+              className="w-full flex items-center gap-3 p-3.5 text-red-400 hover:bg-red-500/10 rounded-2xl transition-all border border-transparent hover:border-red-500/20 group cursor-pointer"
+            >
+              <div className="p-2 bg-red-500/10 rounded-xl group-hover:bg-red-500/20 text-red-400">
+                <LogOut size={18} />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider">Encerrar Sessão</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Detail Overlay View (Shown on mobile when a subscreen is opened) */}
+      <div className={`fixed inset-0 bg-[#0A1626] z-50 flex flex-col md:hidden overflow-hidden ${isMobileDetailOpen ? 'flex' : 'hidden'}`}>
+        {/* Mobile Detail Header */}
+        <div className="px-4 py-4 pt-16 border-b border-white/10 flex items-center justify-between bg-[#0F1E36] sticky top-0 z-10 shadow-md">
           <button 
-            onClick={() => setShowLogoutConfirm(true)}
-            className="w-full flex items-center gap-3 p-3.5 mt-4 text-red-400 hover:bg-red-500/10 rounded-2xl transition-all border border-transparent hover:border-red-500/20 group cursor-pointer"
+            onClick={() => setIsMobileDetailOpen(false)} 
+            className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/15 rounded-xl transition-colors cursor-pointer text-white text-xs font-bold uppercase tracking-wider"
           >
-            <div className="p-2 bg-red-500/10 rounded-xl group-hover:bg-red-500/20">
-              <LogOut size={18} />
-            </div>
-            <span className="text-xs font-bold uppercase tracking-wider">Encerrar Sessão</span>
+            <ChevronLeft size={18} />
+            <span>Voltar ao Menu</span>
           </button>
+          <div className="text-right">
+            <h2 className="text-xs font-black text-white uppercase tracking-wider">
+              {currentItem.label}
+            </h2>
+            <p className="text-[10px] text-[#00A3E0] font-medium">PARAVERSO</p>
+          </div>
+        </div>
+
+        {/* Mobile Detail Content */}
+        <div className="flex-1 overflow-y-auto pb-32 hide-scrollbar">
+          {renderActiveScreen()}
         </div>
       </div>
 
-      {/* Desktop Right Content */}
-      <div className="hidden md:block flex-1 bg-[#0A1626] overflow-hidden relative">
-        <div className="h-full overflow-y-auto hide-scrollbar relative z-10 overscroll-contain">
-          {renderContent()}
+      {/* Desktop Main Content Area (Hidden on mobile) */}
+      <div className="hidden md:flex flex-1 flex-col h-full bg-[#0A1626] overflow-hidden">
+        {/* Desktop Header */}
+        <div className="pt-20 px-8 py-5 border-b border-white/10 bg-[#0F1E36]/60 backdrop-blur-md flex items-center justify-between shrink-0">
+          <div>
+            <span className="text-[10px] font-bold text-[#00A3E0] uppercase tracking-wider">Painel do Usuário</span>
+            <h2 className="text-lg font-black text-white uppercase tracking-tight">
+              {currentItem.label}
+            </h2>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-300 font-bold">{user.name}</p>
+            <p className="text-[10px] text-gray-400">CPF: {user.cpf}</p>
+          </div>
+        </div>
+
+        {/* Desktop Subview Scroll Container */}
+        <div className="flex-1 overflow-y-auto hide-scrollbar overscroll-contain">
+          {renderActiveScreen()}
         </div>
       </div>
-
-      <CertificateViewerModal 
-        certificate={selectedCert}
-        userName={user.name}
-        onClose={() => setSelectedCert(null)}
-      />
-
-      <PWAInstallModal 
-        isOpen={showInstallModal}
-        onClose={() => setShowInstallModal(false)}
-        isInstallable={isInstallable}
-        isInstalled={isInstalled}
-        isIOS={isIOS}
-        isAndroid={isAndroid}
-        onInstall={install}
-      />
 
       {/* Logout Modal */}
       {showLogoutConfirm && (
@@ -317,7 +220,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout }) => {
             <div className="space-y-1">
               <h3 className="text-base font-bold uppercase tracking-tight">Encerrar sessão?</h3>
               <p className="text-xs text-gray-300 leading-relaxed">
-                Você precisará entrar novamente para acessar seus certificados e histórico cultural.
+                Você precisará entrar novamente para acessar sua lista e conteúdos do PARAVERSO.
               </p>
             </div>
             <div className="flex flex-col gap-2.5 pt-2">

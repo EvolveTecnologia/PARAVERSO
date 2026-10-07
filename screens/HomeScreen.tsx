@@ -50,6 +50,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onCourseClick, onCategoryClick,
       description: 'A cosmologia sagrada, a resistência histórica e a riqueza cultural dos Munduruku em registros imersivos de alta fidelidade.',
       image: 'https://www.esquerdadiario.com.br/IMG/jpg/162205115260ae895080312_1622051152_3x2_rt.jpg',
       category: 'Patrimonial e Saberes'
+    },
+    {
+      id: 'amazonia-vr-360',
+      title: 'A FLORESTA AMAZÔNICA EM REALIDADE VIRTUAL 360º',
+      subtitle: 'Imersão & Biodiversidade Única',
+      description: 'Sobrevoe as copas das árvores centenárias, navegue pelos igarapés intocados e conheça a biodiversidade única das Unidades de Conservação do Estado do Pará.',
+      image: 'https://i.ytimg.com/vi/J2RWKouu7fs/maxresdefault.jpg',
+      category: 'Meio Ambiente'
     }
   ];
 
